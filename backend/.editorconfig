@@ -1,0 +1,58 @@
+# Analyzer triage — the rules below were tuned on purpose after turning TreatWarningsAsErrors on.
+# Every entry has a reason: "we don't like it" is not a reason, "irrelevant in ASP.NET Core" is.
+root = true
+
+[*]
+indent_style = space
+indent_size = 2
+end_of_line = lf
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+[*.cs]
+indent_size = 4
+csharp_style_namespace_declarations = file_scoped:warning
+csharp_prefer_braces = when_multiline
+
+# ── Disabled: not applicable to this codebase ────────────────────────────────
+# ASP.NET Core has no SynchronizationContext → ConfigureAwait(false) is pure noise.
+dotnet_diagnostic.MA0004.severity = none
+# Vertical-slice style: small records live next to the code that uses them, one file per feature.
+dotnet_diagnostic.MA0048.severity = none
+# Parameter names must match the interface: cosmetic, and 'ctx' is idiomatic in middleware code.
+dotnet_diagnostic.CA1725.severity = none
+dotnet_diagnostic.S927.severity = none
+# 'public partial class Program' exists only so tests can reference it (WebApplicationFactory<Program>).
+dotnet_diagnostic.S1118.severity = none
+# Library-interop naming rules (don't clash with VB keywords like Error/event/Shared, no static
+# members on generics): we are an application, not a NuGet package consumed from other languages.
+dotnet_diagnostic.CA1716.severity = none
+dotnet_diagnostic.CA1711.severity = none
+dotnet_diagnostic.CA1000.severity = none
+
+# ── Downgraded to suggestion: valid, but not worth failing the build in a lab ─
+# Culture-sensitive string APIs (StringComparison / IFormatProvider overloads).
+dotnet_diagnostic.MA0006.severity = suggestion
+dotnet_diagnostic.MA0074.severity = suggestion
+dotnet_diagnostic.MA0002.severity = suggestion
+dotnet_diagnostic.MA0011.severity = suggestion
+dotnet_diagnostic.CA1305.severity = suggestion
+# Performance-oriented logging rules (LoggerMessage source generators) — do it in hot paths only.
+dotnet_diagnostic.CA1848.severity = suggestion
+dotnet_diagnostic.CA1873.severity = suggestion
+# Prefer IReadOnlyList/IEnumerable over List in signatures: good advice, applied progressively.
+dotnet_diagnostic.MA0016.severity = suggestion
+# Redundant null-forgiving operator: harmless.
+dotnet_diagnostic.S8969.severity = suggestion
+# Static readonly arrays instead of inline constant arrays: micro-optimisation.
+dotnet_diagnostic.CA1861.severity = suggestion
+
+# ── Adjusted thresholds ───────────────────────────────────────────────────────
+# Endpoint-mapping methods are long by nature (one method = one feature's routes).
+MA0051.maximum_lines_per_method = 120
+
+# ── Test projects: readable test names beat naming conventions ───────────────
+[DevLab.Api.Tests/**.cs]
+# Snake_case test names (Given_When_Then style) are the norm in xUnit projects.
+dotnet_diagnostic.CA1707.severity = none
