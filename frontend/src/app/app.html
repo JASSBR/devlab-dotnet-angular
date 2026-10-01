@@ -1,0 +1,69 @@
+<div class="layout" [class.panel-open]="panelOpen()">
+  <aside class="sidebar" [class.open]="sidebarOpen()">
+    <a routerLink="/" class="brand" (click)="sidebarOpen.set(false)">
+      <span class="logo">⟨/⟩</span>
+      <span>
+        <strong>DevLab</strong>
+        <small>.NET 10 × Angular 22</small>
+      </span>
+    </a>
+
+    <button class="search" (click)="palette().toggle()">
+      <span>🔍 Rechercher…</span>
+      <kbd>{{ isMac ? '⌘' : 'Ctrl' }} K</kbd>
+    </button>
+
+    <div class="progress">
+      <div class="bar"><div class="fill" [style.width.%]="progress.percent()"></div></div>
+      <small>{{ progress.count() }}/{{ total }} leçons · {{ progress.percent() }}%</small>
+    </div>
+
+    <nav>
+      <a routerLink="/roadmap" routerLinkActive="active" class="interview-link" (click)="sidebarOpen.set(false)">
+        <span class="icon">🧭</span><span class="label">Mode carrière</span>
+      </a>
+      <a routerLink="/interview" routerLinkActive="active" class="interview-link" (click)="sidebarOpen.set(false)">
+        <span class="icon">🎤</span><span class="label">Mode entretien</span>
+      </a>
+      @for (t of tracks; track t[0]) {
+        <div class="track">
+          <div class="track-title" [style.color]="t[1].color">{{ t[1].label }}</div>
+          @for (l of lessonsOf(t[0]); track l.id) {
+            <a [routerLink]="['/lessons', l.id]" routerLinkActive="active" (click)="sidebarOpen.set(false)">
+              <span class="icon">{{ l.icon }}</span>
+              <span class="label">{{ l.title }}</span>
+              @if (progress.isDone(l.id)) { <span class="done">✓</span> }
+            </a>
+          }
+        </div>
+      }
+    </nav>
+
+    <div class="me">
+      @if (auth.isLoggedIn()) {
+        <div class="row">
+          <span class="badge ok">● {{ auth.userName() }}</span>
+          <span class="badge" [class.warn]="auth.expiresInSeconds() < 15">{{ auth.expiresInSeconds() }}s</span>
+        </div>
+        <button class="sm" (click)="auth.logout()">Déconnexion</button>
+      } @else {
+        <span class="badge">○ anonyme</span>
+        <a routerLink="/lessons/auth-jwt" class="small">Se connecter (leçon JWT)</a>
+      }
+    </div>
+  </aside>
+
+  <main>
+    <button class="burger sm" (click)="sidebarOpen.set(!sidebarOpen())">☰</button>
+    <router-outlet />
+  </main>
+
+  <button class="net-toggle" (click)="panelOpen.set(!panelOpen())">
+    <span class="dot" [class.pulse]="log.pending() > 0"></span>
+    Réseau · {{ pendingLabel() }}
+  </button>
+  @if (panelOpen()) {
+    <network-panel (close)="panelOpen.set(false)" />
+  }
+  <command-palette />
+</div>

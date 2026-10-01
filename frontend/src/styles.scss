@@ -1,0 +1,135 @@
+@use 'highlight.js/styles/github-dark-dimmed.css';
+
+:root {
+  --bg: #080b14;
+  --bg-2: #0f1420;
+  --bg-3: #171e2e;
+  --surface: #121826f2;
+  --border: #222c42;
+  --border-strong: #32405e;
+  --text: #e8ecf5;
+  --muted: #8b95a7;
+  --brand: #7c5cff;
+  --brand-2: #22d3ee;
+  --brand-soft: #7c5cff22;
+  --shadow-sm: 0 1px 2px #0006, 0 4px 12px #0004;
+  --shadow-lg: 0 24px 70px -12px #000c, 0 0 0 1px #ffffff08;
+  --angular: #ef4468;
+  --dotnet: #7c5cff;
+  --auth: #f59e0b;
+  --ok: #22c55e;
+  --warn: #f59e0b;
+  --err: #ef4444;
+  --radius: 14px;
+  --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  font-family: Inter, system-ui, -apple-system, sans-serif;
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  // Two faint light sources instead of a flat fill: gives the page depth without noise.
+  background:
+    radial-gradient(1100px 700px at 12% -10%, #7c5cff14, transparent 60%),
+    radial-gradient(900px 600px at 95% 0%, #22d3ee0e, transparent 55%),
+    var(--bg);
+  background-attachment: fixed;
+}
+::selection { background: #7c5cff55; }
+:focus-visible { outline: 2px solid var(--brand-2); outline-offset: 2px; border-radius: 6px; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+a { color: var(--brand-2); text-decoration: none; }
+h1, h2, h3, h4 { margin: 0 0 .5rem; line-height: 1.15; letter-spacing: -.022em; text-wrap: balance; }
+h1 { font-size: clamp(1.75rem, 1.2rem + 2.2vw, 2.6rem); font-weight: 800; }
+h2 { font-size: clamp(1.2rem, 1.05rem + .6vw, 1.5rem); font-weight: 700; }
+h3 { font-size: 1.05rem; font-weight: 600; }
+p { margin: 0 0 .75rem; }
+code { font-family: var(--mono); font-size: .86em; background: var(--bg-3); padding: .1em .4em; border-radius: 6px; color: #c9d1ff; }
+pre code { background: none; padding: 0; }
+button, .btn {
+  font: inherit; cursor: pointer;
+  background: var(--bg-3); color: var(--text);
+  border: 1px solid var(--border); border-radius: 10px;
+  padding: .5rem .9rem; font-weight: 500;
+  transition: border-color .15s, background .15s, transform .12s, box-shadow .15s;
+  &:hover { border-color: var(--border-strong); background: #1d2537; transform: translateY(-1px); }
+  &:active { transform: none; }
+  &:disabled { opacity: .5; cursor: not-allowed; }
+  &.primary { background: linear-gradient(135deg, #8b6dff, #5b3df5); border-color: transparent; color: #fff;
+    box-shadow: 0 1px 0 #ffffff2e inset, 0 6px 18px -6px #7c5cff9c; }
+  &.primary:hover { filter: brightness(1.08); border-color: transparent; }
+  &.danger { border-color: #7f1d1d; color: #fca5a5; }
+  &.sm { padding: .3rem .6rem; font-size: .85rem; }
+}
+input, select, textarea {
+  font: inherit; color: var(--text);
+  background: var(--bg); border: 1px solid var(--border); border-radius: 10px;
+  padding: .5rem .75rem;
+  &:focus { outline: none; border-color: var(--brand); box-shadow: 0 0 0 3px #7c5cff33; }
+  &.ng-invalid.ng-touched { border-color: var(--err); }
+}
+label { font-size: .85rem; color: var(--muted); display: block; margin-bottom: .25rem; }
+
+.card {
+  background: linear-gradient(180deg, #ffffff06, transparent 40%), var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 1.1rem 1.25rem;
+  box-shadow: var(--shadow-sm);
+}
+.row { display: flex; gap: .6rem; align-items: center; flex-wrap: wrap; }
+.col { display: flex; flex-direction: column; gap: .6rem; }
+.grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; }
+.muted { color: var(--muted); }
+.small { font-size: .85rem; }
+.mono { font-family: var(--mono); font-size: .85rem; }
+.badge {
+  display: inline-flex; align-items: center; gap: .3rem;
+  font-size: .75rem; font-weight: 600; padding: .15rem .55rem; border-radius: 999px;
+  background: var(--bg-3); border: 1px solid var(--border); color: var(--muted);
+  &.ok { color: #86efac; border-color: #14532d; background: #052e16; }
+  &.warn { color: #fde68a; border-color: #713f12; background: #2a1c05; }
+  &.err { color: #fca5a5; border-color: #7f1d1d; background: #2a0808; }
+  &.brand { color: #c4b5fd; border-color: #4c1d95; background: #1e1040; }
+  &.angular { color: #fda4af; border-color: #881337; background: #2a0a12; }
+  &.auth { color: #fcd34d; border-color: #78350f; background: #2a1a05; }
+  &.info { color: #a5f3fc; border-color: #155e75; background: #082f3a; }
+}
+.json {
+  font-family: var(--mono); font-size: .8rem; white-space: pre-wrap; word-break: break-all;
+  background: #0a0e17; border: 1px solid var(--border); border-radius: 10px; padding: .75rem; margin: 0;
+  max-height: 340px; overflow: auto; color: #b4c6e7;
+}
+.callout {
+  border-left: 3px solid var(--brand); background: #151b2b; padding: .75rem 1rem; border-radius: 0 10px 10px 0; margin: .75rem 0;
+  &.warn { border-color: var(--warn); }
+  &.ok { border-color: var(--ok); }
+  &.err { border-color: var(--err); }
+}
+.steps { counter-reset: step; list-style: none; padding: 0; margin: 0;
+  li { position: relative; padding-left: 2.2rem; margin-bottom: .6rem;
+    &::before { counter-increment: step; content: counter(step); position: absolute; left: 0; top: .05rem;
+      width: 1.5rem; height: 1.5rem; border-radius: 999px; background: var(--brand); color: #fff;
+      font-size: .75rem; font-weight: 700; display: grid; place-items: center; } } }
+table { width: 100%; border-collapse: collapse; font-size: .9rem;
+  th, td { text-align: left; padding: .45rem .6rem; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted); font-weight: 600; font-size: .8rem; text-transform: uppercase; letter-spacing: .04em; } }
+.pulse { animation: pulse 1.2s ease-in-out infinite; }
+@keyframes pulse { 0%,100% { opacity: 1 } 50% { opacity: .4 } }
+.fade-in { animation: fade .34s cubic-bezier(.2,.7,.3,1) both; }
+@keyframes fade { from { opacity: 0; transform: translateY(8px) } to { opacity: 1; transform: none } }
+// Staggered reveal, for SHORT lists only (<= 6 items). `backwards` holds the start
+// frame during the delay but leaves the resting state untouched, so content is never
+// hidden by a stylesheet that failed to animate.
+.stagger > * { animation: fade .3s cubic-bezier(.2,.7,.3,1) backwards; }
+@for $i from 1 through 6 { .stagger > *:nth-child(#{$i}) { animation-delay: #{$i * 40}ms; } }
+kbd { font-family: var(--mono); font-size: .75rem; background: var(--bg-3); border: 1px solid var(--border); border-bottom-width: 2px; padding: .05rem .35rem; border-radius: 5px; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: #2a3550; border-radius: 10px; border: 2px solid var(--bg); }
