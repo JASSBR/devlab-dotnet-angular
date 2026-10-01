@@ -51,7 +51,7 @@ avec détection des points-clés dans ta réponse + auto-évaluation, explicatio
 | Partie | Où | Pourquoi |
 |---|---|---|
 | Frontend Angular | **Vercel** → https://devlab-dotnet-angular.vercel.app | statique, CDN, preview par déploiement |
-| API .NET | **Azure Container Apps** (Docker) | Vercel n'exécute pas ASP.NET Core : il faut un conteneur long-running (SignalR, EF, SQLite). Scale-to-zero = coût nul sans trafic. |
+| API .NET | **Azure Container Apps** — https://devlab-api.thankfulsky-d03b7a33.italynorth.azurecontainerapps.io | Vercel n'exécute pas ASP.NET Core : il faut un conteneur long-running (SignalR, EF, SQLite). Scale-to-zero = coût nul sans trafic. |
 
 ```bash
 # 1. front (à refaire après chaque modif)
@@ -67,6 +67,13 @@ railway login && ./deploy-backend.sh
 
 L'API tourne en `Production` : clé JWT générée à chaque déploiement (jamais celle du repo),
 origines CORS et URIs de redirection OIDC injectées en variables d'environnement.
+
+**Contraintes rencontrées sur « Azure for Students »**, encodées dans le script :
+- une *policy* limite les régions à `italynorth, norwayeast, austriaeast, belgiumcentral, polandcentral` ;
+- **ACR Tasks est interdit** → l'image est construite localement (`--platform linux/amd64`, obligatoire
+  depuis un Mac Apple Silicon) puis poussée, au lieu du build distant de `az containerapp up`.
+
+Base SQLite éphémère : avec le scale-to-zero, chaque réveil repart d'une base reseedée.
 
 **Comment le front trouve le back** : `frontend/vercel.json` proxifie `/api/*` et `/idp/*` vers Railway
 (le navigateur reste en *same-origin* → les leçons Cookie et CSRF fonctionnent réellement).

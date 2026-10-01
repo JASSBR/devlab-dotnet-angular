@@ -5,7 +5,11 @@ set -euo pipefail
 cd "$(dirname "$0")"
 
 RG="${RG:-rg-devlab}"
-LOCATION="${LOCATION:-westeurope}"
+# Les abonnements Azure for Students sont restreints par la politique
+# « Allowed resource deployment regions ». Pour celui-ci : italynorth, norwayeast,
+# austriaeast, belgiumcentral, polandcentral. Vérifier avec :
+#   az rest --method get --url "https://management.azure.com/subscriptions/<id>/providers/Microsoft.Authorization/policyAssignments?api-version=2023-04-01"
+LOCATION="${LOCATION:-italynorth}"
 APP="${APP:-devlab-api}"
 ENVIRONMENT="${ENVIRONMENT:-devlab-env}"
 VERCEL_URL="${VERCEL_URL:-https://devlab-dotnet-angular.vercel.app}"
@@ -26,16 +30,41 @@ az group create --name "$RG" --location "$LOCATION" --only-show-errors >/dev/nul
 # Clé de signature neuve : celle du repo est publique (le lab l'affiche lui-même).
 JWT_KEY="${JWT_KEY:-$(openssl rand -base64 48 | tr -d '\n')}"
 
-echo "→ Build de l'image et déploiement (première fois : ~5 min, Azure construit le Dockerfile)"
-az containerapp up \
-  --name "$APP" \
-  --resource-group "$RG" \
-  --location "$LOCATION" \
-  --environment "$ENVIRONMENT" \
-  --source . \
-  --ingress external \
-  --target-port 8080 \
-  --only-show-errors
+# ACR Tasks (le build distant de `containerapp up`) est interdit sur les abonnements
+# Student. On construit donc l'image localement et on la pousse : --platform linux/amd64
+# est indispensable depuis un Mac Apple Silicon, sinon Azure refuse l'architecture.
+ACR="$(az acr list -g "$RG" --query "[0].name" -o tsv 2>/dev/null)"
+if [ -z "$ACR" ]; then
+  ACR="devlabacr$RANDOM"
+  echo "→ Création du registre $ACR"
+  az acr create -n "$ACR" -g "$RG" -l "$LOCATION" --sku Basic --only-show-errors >/dev/null
+fi
+az acr update -n "$ACR" --admin-enabled true --only-show-errors >/dev/null
+SERVER="$(az acr show -n "$ACR" --query loginServer -o tsv)"
+IMAGE="$SERVER/devlab-api:$(date +%Y%m%d%H%M)"
+
+echo "→ Build local (linux/amd64) et push vers $SERVER"
+az acr login -n "$ACR" >/dev/null
+docker buildx build --platform linux/amd64 -t "$IMAGE" --push . >/dev/null
+
+echo "→ Environnement Container Apps"
+az containerapp env show -n "$ENVIRONMENT" -g "$RG" --only-show-errors >/dev/null 2>&1 || \
+  az containerapp env create -n "$ENVIRONMENT" -g "$RG" -l "$LOCATION" --only-show-errors >/dev/null
+
+ACR_USER="$(az acr credential show -n "$ACR" --query username -o tsv)"
+ACR_PASS="$(az acr credential show -n "$ACR" --query 'passwords[0].value' -o tsv)"
+
+echo "→ Déploiement de l'application"
+if az containerapp show -n "$APP" -g "$RG" --only-show-errors >/dev/null 2>&1; then
+  az containerapp update -n "$APP" -g "$RG" --image "$IMAGE" --only-show-errors >/dev/null
+else
+  az containerapp create -n "$APP" -g "$RG" --environment "$ENVIRONMENT" \
+    --image "$IMAGE" \
+    --registry-server "$SERVER" --registry-username "$ACR_USER" --registry-password "$ACR_PASS" \
+    --ingress external --target-port 8080 --transport auto \
+    --cpu 0.5 --memory 1.0Gi \
+    --only-show-errors >/dev/null
+fi
 
 echo "→ Secrets et configuration"
 az containerapp secret set --name "$APP" --resource-group "$RG" \

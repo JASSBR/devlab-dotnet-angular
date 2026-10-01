@@ -4,19 +4,44 @@
   "outputDirectory": "dist/frontend/browser",
   "framework": "angular",
   "rewrites": [
-    { "source": "/((?!api/|idp/|hubs/).*)", "destination": "/index.html" }
+    {
+      "source": "/api/:path*",
+      "destination": "https://devlab-api.thankfulsky-d03b7a33.italynorth.azurecontainerapps.io/api/:path*"
+    },
+    {
+      "source": "/idp/:path*",
+      "destination": "https://devlab-api.thankfulsky-d03b7a33.italynorth.azurecontainerapps.io/idp/:path*"
+    },
+    {
+      "source": "/((?!api/|idp/|hubs/).*)",
+      "destination": "/index.html"
+    }
   ],
   "headers": [
     {
       "source": "/source-snapshot.json",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }]
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
     },
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
-        { "key": "X-Frame-Options", "value": "SAMEORIGIN" }
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "SAMEORIGIN"
+        }
       ]
     }
   ]
