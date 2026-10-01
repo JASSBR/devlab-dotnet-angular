@@ -1,0 +1,26 @@
+# .NET
+bin/
+obj/
+*.db
+*.db-shm
+*.db-wal
+.vs/
+
+# Node / Angular
+node_modules/
+dist/
+.angular/
+npm-debug.log*
+
+# OS / IDE
+.DS_Store
+.idea/
+.vscode/
+
+# Vercel (contient l'ID du projet lié)
+.vercel/
+
+# Sorties de build / artefacts locaux
+*.user
+coverage/
+TestResults/
