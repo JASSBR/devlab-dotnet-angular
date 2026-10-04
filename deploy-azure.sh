@@ -19,7 +19,7 @@ echo "→ Abonnement : $(az account show --query name -o tsv)"
 
 # L'extension et les fournisseurs ne sont provisionnés qu'une fois par abonnement.
 az extension add --name containerapp --upgrade --only-show-errors >/dev/null
-for ns in Microsoft.App Microsoft.OperationalInsights Microsoft.ContainerRegistry; do
+for ns in Microsoft.App Microsoft.OperationalInsights; do
   az provider register --namespace "$ns" --wait --only-show-errors >/dev/null &
 done
 wait
@@ -30,29 +30,22 @@ az group create --name "$RG" --location "$LOCATION" --only-show-errors >/dev/nul
 # Clé de signature neuve : celle du repo est publique (le lab l'affiche lui-même).
 JWT_KEY="${JWT_KEY:-$(openssl rand -base64 48 | tr -d '\n')}"
 
-# ACR Tasks (le build distant de `containerapp up`) est interdit sur les abonnements
-# Student. On construit donc l'image localement et on la pousse : --platform linux/amd64
-# est indispensable depuis un Mac Apple Silicon, sinon Azure refuse l'architecture.
-ACR="$(az acr list -g "$RG" --query "[0].name" -o tsv 2>/dev/null)"
-if [ -z "$ACR" ]; then
-  ACR="devlabacr$RANDOM"
-  echo "→ Création du registre $ACR"
-  az acr create -n "$ACR" -g "$RG" -l "$LOCATION" --sku Basic --only-show-errors >/dev/null
-fi
-az acr update -n "$ACR" --admin-enabled true --only-show-errors >/dev/null
-SERVER="$(az acr show -n "$ACR" --query loginServer -o tsv)"
-IMAGE="$SERVER/devlab-api:$(date +%Y%m%d%H%M)"
-
-echo "→ Build local (linux/amd64) et push vers $SERVER"
-az acr login -n "$ACR" >/dev/null
-docker buildx build --platform linux/amd64 -t "$IMAGE" --push . >/dev/null
+# L'image est construite par GitHub Actions (.github/workflows/images.yml) et publiée sur ghcr.io (publique) :
+# on déploie le commit courant dès que son image existe. Pousser le commit avant de lancer ce script.
+IMAGE="ghcr.io/jassbr/devlab-api:sha-$(git rev-parse --short=7 HEAD)"
+echo "→ Attente de l'image $IMAGE"
+for attempt in $(seq 1 120); do
+  TOKEN=$(curl -s "https://ghcr.io/token?scope=repository:jassbr/devlab-api:pull" | sed -nE 's/.*"token":"([^"]+)".*/\1/p')
+  [ "$(curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $TOKEN" \
+    -H 'Accept: application/vnd.oci.image.index.v1+json, application/vnd.docker.distribution.manifest.v2+json' \
+    "https://ghcr.io/v2/jassbr/devlab-api/manifests/${IMAGE##*:}")" = 200 ] && break
+  [ "$attempt" = 120 ] && { echo "✗ image introuvable : commit poussé ? workflow Images vert ?"; exit 1; }
+  sleep 10
+done
 
 echo "→ Environnement Container Apps"
 az containerapp env show -n "$ENVIRONMENT" -g "$RG" --only-show-errors >/dev/null 2>&1 || \
   az containerapp env create -n "$ENVIRONMENT" -g "$RG" -l "$LOCATION" --only-show-errors >/dev/null
-
-ACR_USER="$(az acr credential show -n "$ACR" --query username -o tsv)"
-ACR_PASS="$(az acr credential show -n "$ACR" --query 'passwords[0].value' -o tsv)"
 
 echo "→ Déploiement de l'application"
 if az containerapp show -n "$APP" -g "$RG" --only-show-errors >/dev/null 2>&1; then
@@ -60,7 +53,6 @@ if az containerapp show -n "$APP" -g "$RG" --only-show-errors >/dev/null 2>&1; t
 else
   az containerapp create -n "$APP" -g "$RG" --environment "$ENVIRONMENT" \
     --image "$IMAGE" \
-    --registry-server "$SERVER" --registry-username "$ACR_USER" --registry-password "$ACR_PASS" \
     --ingress external --target-port 8080 --transport auto \
     --cpu 0.5 --memory 1.0Gi \
     --only-show-errors >/dev/null
