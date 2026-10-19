@@ -38,6 +38,8 @@ export const routes: Routes = [
   },
 
   // ── .NET ─────────────────────────────────────────────────────────────────
+  { path: 'lessons/csharp-fundamentals', loadComponent: () => import('./lessons/dotnet/csharp-fundamentals').then(m => m.CSharpFundamentalsLesson) },
+  { path: 'lessons/collections-linq', loadComponent: () => import('./lessons/dotnet/collections-linq').then(m => m.CollectionsLinqLesson) },
   { path: 'lessons/minimal-vs-controllers', loadComponent: () => import('./lessons/dotnet/minimal-vs-controllers').then(m => m.MinimalVsControllersLesson) },
   { path: 'lessons/di-lifetimes', loadComponent: () => import('./lessons/dotnet/di-lifetimes').then(m => m.DiLifetimesLesson) },
   { path: 'lessons/middleware', loadComponent: () => import('./lessons/dotnet/middleware').then(m => m.MiddlewareLesson) },
