@@ -148,6 +148,18 @@ export const LESSONS: Lesson[] = [
     concepts: ['IModule', 'PublicApi', 'IDomainEvent', 'IEventBus', 'outbox', 'NetArchTest'],
     files: [`${BE}/Features/Products/PublicApi/IProductCatalog.cs`, `${BE}/Features/Products/Events/OrderPlacedHandler.cs`, `${BE}/Infrastructure/Events/InProcessEventBus.cs`, `${BE}/Features/Orders/OrdersModule.cs`, `${BE}/Features/Products/ProductsModule.cs`, `${BE}/Infrastructure/Modules/IModule.cs`, 'backend/DevLab.Api.Tests/ModuleBoundariesTests.cs', `${BE}/Program.cs`],
   },
+  {
+    id: 'observability', track: 'dotnet', icon: '🔭', title: 'Observabilité : logs, métriques, traces',
+    summary: 'Un checkout instrumenté (spans imbriqués, appel HttpClient, requête EF), un viewer de traces en waterfall avec ses logs corrélés, Aspire et les runbooks d’incident.',
+    concepts: ['ActivitySource', 'Activity', 'Meter', 'traceparent', 'BeginScope', 'BaseProcessor', 'OTLP', 'Aspire'],
+    files: [`${BE}/Features/Observability/CheckoutSimulator.cs`, `${BE}/Features/Observability/TelemetryStore.cs`, `${BE}/Features/Observability/ObservabilityLesson.cs`, 'backend/DevLab.ServiceDefaults/Extensions.cs', 'backend/DevLab.AppHost/Program.cs', `${FE}/lessons/dotnet/observability.ts`, 'docs/runbooks/01-api-5xx-readiness.md', 'docs/runbooks/02-latency-threadpool.md', 'docs/runbooks/03-signalr-cors-after-deploy.md'],
+  },
+  {
+    id: 'health-checks', track: 'dotnet', icon: '🩺', title: 'Health checks : liveness, readiness, startup',
+    summary: 'Trois probes filtrées par tags, un check EF Core, un check custom Degraded, un rapport JSON détaillé — et une dépendance à casser pour voir 503 vs 200.',
+    concepts: ['AddHealthChecks', 'IHealthCheck', 'tags + Predicate', 'AddDbContextCheck', 'Degraded', 'IHealthCheckPublisher', 'probes'],
+    files: [`${BE}/Features/HealthChecks/HealthChecksLesson.cs`, 'backend/DevLab.ServiceDefaults/Extensions.cs', 'backend/DevLab.Api.Tests/HealthChecksTests.cs', `${FE}/lessons/dotnet/health-checks.ts`, `${BE}/Program.cs`],
+  },
 
   // ─── Auth (full-stack) ──────────────────────────────────────────────────
   {

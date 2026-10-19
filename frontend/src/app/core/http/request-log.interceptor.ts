@@ -5,6 +5,8 @@ import { finalize, tap } from 'rxjs';
 export interface LogEntry {
   id: number; method: string; url: string; status?: number; ok?: boolean;
   startedAt: number; durationMs?: number; headers: Record<string, string>; error?: string;
+  /** W3C trace context echoed by the API (see ObservabilityLesson.UseTraceparentResponseHeader). */
+  traceparent?: string;
 }
 
 /** The "network panel" state: a signal holding the last 60 HTTP calls. */
@@ -38,8 +40,8 @@ export const requestLogInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(req).pipe(
     tap({
-      next: ev => { if (ev instanceof HttpResponse) log.finish(entry, { status: ev.status, ok: true }); },
-      error: (err: HttpErrorResponse) => log.finish(entry, { status: err.status, ok: false, error: err.error?.title ?? err.error?.error ?? err.message }),
+      next: ev => { if (ev instanceof HttpResponse) log.finish(entry, { status: ev.status, ok: true, traceparent: ev.headers.get('traceparent') ?? undefined }); },
+      error: (err: HttpErrorResponse) => log.finish(entry, { status: err.status, ok: false, error: err.error?.title ?? err.error?.error ?? err.message, traceparent: err.headers?.get('traceparent') ?? undefined }),
     }),
     finalize(() => { if (entry.status === undefined) log.finish(entry, {}); }),
   );

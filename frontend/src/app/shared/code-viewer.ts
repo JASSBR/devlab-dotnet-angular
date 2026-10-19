@@ -5,6 +5,7 @@ import hljs from 'highlight.js/lib/core';
 import csharp from 'highlight.js/lib/languages/csharp';
 import ini from 'highlight.js/lib/languages/ini';
 import json from 'highlight.js/lib/languages/json';
+import markdown from 'highlight.js/lib/languages/markdown';
 import scss from 'highlight.js/lib/languages/scss';
 import typescript from 'highlight.js/lib/languages/typescript';
 import xml from 'highlight.js/lib/languages/xml';
@@ -15,6 +16,7 @@ hljs.registerLanguage('xml', xml);
 hljs.registerLanguage('json', json);
 hljs.registerLanguage('scss', scss);
 hljs.registerLanguage('ini', ini);
+hljs.registerLanguage('markdown', markdown);
 
 /**
  * Renders the project's real files with highlight.js. Source: the API when it is

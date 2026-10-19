@@ -50,6 +50,8 @@ export const routes: Routes = [
   { path: 'lessons/vertical-slice', loadComponent: () => import('./lessons/dotnet/vertical-slice').then(m => m.VerticalSliceLesson) },
   { path: 'lessons/modular-monolith', loadComponent: () => import('./lessons/dotnet/modular-monolith').then(m => m.ModularMonolithLesson) },
   { path: 'lessons/testing', loadComponent: () => import('./lessons/dotnet/testing').then(m => m.TestingLesson) },
+  { path: 'lessons/observability', loadComponent: () => import('./lessons/dotnet/observability').then(m => m.ObservabilityLesson), title: 'Observabilité' },
+  { path: 'lessons/health-checks', loadComponent: () => import('./lessons/dotnet/health-checks').then(m => m.HealthChecksLesson), title: 'Health checks' },
 
   // ── Auth ─────────────────────────────────────────────────────────────────
   { path: 'lessons/auth-jwt', loadComponent: () => import('./lessons/auth/jwt').then(m => m.JwtLesson) },

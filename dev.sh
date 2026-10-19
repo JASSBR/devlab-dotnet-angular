@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Starts the API and the Angular dev server together. Ctrl+C stops both.
+# Same thing with the Aspire dashboard (logs, traces, metrics): ./aspire.sh
 set -e
 cd "$(dirname "$0")"
 export PATH="$HOME/.dotnet:$PATH"

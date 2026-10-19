@@ -6,6 +6,11 @@
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" PrivateAssets="all" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" />
     <PackageReference Include="Scalar.AspNetCore" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Aspire ServiceDefaults: OpenTelemetry + default health endpoints + service discovery. -->
+    <ProjectReference Include="..\DevLab.ServiceDefaults\DevLab.ServiceDefaults.csproj" />
   </ItemGroup>
 </Project>

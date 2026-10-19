@@ -1,4 +1,6 @@
 <Solution>
   <Project Path="DevLab.Api.Tests/DevLab.Api.Tests.csproj" />
   <Project Path="DevLab.Api/DevLab.Api.csproj" />
+  <Project Path="DevLab.AppHost/DevLab.AppHost.csproj" />
+  <Project Path="DevLab.ServiceDefaults/DevLab.ServiceDefaults.csproj" />
 </Solution>
