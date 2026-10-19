@@ -12,8 +12,10 @@ using DevLab.Api.Features.Greetings;
 using DevLab.Api.Features.Middleware;
 using DevLab.Api.Features.Products;
 using DevLab.Api.Features.Realtime;
+using DevLab.Api.Features.Resilience;
 using DevLab.Api.Features.SourceCode;
 using DevLab.Api.Features.Validation;
+using DevLab.Api.Features.Versioning;
 using DevLab.Api.Infrastructure;
 using DevLab.Api.Infrastructure.Modules;
 using Scalar.AspNetCore;
@@ -45,6 +47,10 @@ builder.Services.AddRealtimeLesson();
 
 // Lesson: Caching + rate limiting
 builder.Services.AddCachingLesson();
+
+// Lessons (production APIs): Resilience (Polly v8 pipelines) + API versioning (+ OpenAPI "v2")
+builder.Services.AddResilienceLesson();
+builder.Services.AddApiVersioningLesson();
 
 // Lesson: Authentication (JWT, Cookie, API key, OIDC) + Authorization policies
 builder.Services.AddLabUsers();
@@ -99,6 +105,8 @@ app.MapProductsEndpoints();
 app.MapValidationEndpoints();
 app.MapRealtimeEndpoints();
 app.MapCachingEndpoints();
+app.MapResilienceEndpoints();
+app.MapApiVersioningEndpoints();
 app.MapConfigEndpoints();
 app.MapJwtEndpoints();
 app.MapCookieEndpoints();

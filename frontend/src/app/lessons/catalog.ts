@@ -114,9 +114,21 @@ export const LESSONS: Lesson[] = [
   },
   {
     id: 'caching', track: 'dotnet', icon: '🚀', title: 'Cache & rate limiting',
-    summary: 'IMemoryCache vs OutputCache, mesurés en direct. Puis un rate limiter qui répond 429.',
-    concepts: ['IMemoryCache', 'GetOrCreateAsync', 'CacheOutput', 'VaryByQuery', 'RateLimiter', '429'],
-    files: [`${BE}/Features/Caching/CachingLesson.cs`, `${FE}/lessons/dotnet/caching.ts`],
+    summary: 'IMemoryCache vs OutputCache vs HybridCache (L1 + L2, anti-stampede, tags), mesurés en direct. Puis un rate limiter qui répond 429.',
+    concepts: ['IMemoryCache', 'GetOrCreateAsync', 'CacheOutput', 'HybridCache', 'stampede', 'RemoveByTagAsync', 'RateLimiter', '429'],
+    files: [`${BE}/Features/Caching/CachingLesson.cs`, `${FE}/lessons/dotnet/caching.ts`, 'backend/DevLab.Api.Tests/HybridCacheTests.cs'],
+  },
+  {
+    id: 'resilience', track: 'dotnet', icon: '🛟', title: 'Résilience : retries, timeouts, circuit breaker',
+    summary: 'Une dépendance instable réglable, trois HttpClient (nu, standard handler, pipeline Polly v8 sur mesure) comparés en direct : tentatives, backoff, circuit ouvert, p50/p95.',
+    concepts: ['AddStandardResilienceHandler', 'AddResilienceHandler', 'retry + jitter', 'circuit breaker', 'attempt timeout', 'idempotence', 'hedging'],
+    files: [`${BE}/Features/Resilience/ResilienceLesson.cs`, `${BE}/Features/Resilience/ResilienceRecorder.cs`, `${BE}/Features/Resilience/FlakyEndpointState.cs`, `${BE}/Features/Resilience/SelfBaseAddress.cs`, 'backend/DevLab.Api.Tests/ResilienceTests.cs', `${FE}/lessons/dotnet/resilience.ts`],
+  },
+  {
+    id: 'api-versioning', track: 'dotnet', icon: '🏷️', title: 'Versioning d’API',
+    summary: 'Un contrat v1 déprécié et un v2 breaking, servis par URL, header et query string, avec api-supported-versions, Deprecation, Sunset et un document OpenAPI par version.',
+    concepts: ['Asp.Versioning.Http', 'NewVersionedApi', 'ApiVersionReader.Combine', 'ReportApiVersions', 'Deprecation', 'Sunset', 'OpenAPI par version'],
+    files: [`${BE}/Features/Versioning/ApiVersioningLesson.cs`, 'backend/DevLab.Api.Tests/ApiVersioningTests.cs', `${FE}/lessons/dotnet/api-versioning.ts`, `${BE}/Program.cs`],
   },
   {
     id: 'options', track: 'dotnet', icon: '⚙️', title: 'Configuration & Options pattern',

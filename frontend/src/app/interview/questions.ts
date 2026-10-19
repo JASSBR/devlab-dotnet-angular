@@ -682,4 +682,71 @@ export const QUESTIONS: Question[] = [
     ],
     model: `<p>Le cœur : ne jamais envoyer une notification dans la requête HTTP qui la déclenche. Les modules métier publient un message (« commande confirmée ») dans une file ; un service de notifications le consomme, résout les préférences de l’utilisateur (canaux, opt-out, langue), rend un template, et appelle le fournisseur (SendGrid, Twilio, FCM) via un adaptateur par canal. Chaque envoi porte une clé d’idempotence — un retry ne doit jamais doubler un SMS. Les échecs partent en retry avec backoff, puis en dead-letter queue pour analyse. Les fournisseurs ont des quotas : un rate limiter par fournisseur. Et chaque notification a un statut persisté (queued, sent, failed, delivered via webhook) corrélé par traceId, avec des métriques d’échec qui alertent.</p>`,
   },
+
+  // ── resilience / caching / api-versioning ──
+  {
+    id: 'net-standard-resilience', topic: 'dotnet', level: 2, type: 'mcq',
+    question: 'Avec AddStandardResilienceHandler(), une tentative met 15 s à répondre (défauts inchangés). Que se passe-t-il ?',
+    choices: [
+      'Rien : le standard handler ne gère que les codes 5xx.',
+      'L’attempt timeout (10 s) coupe la tentative, le retry la relance avec backoff exponentiel + jitter, et le total timeout (30 s) borne l’ensemble.',
+      'Le circuit breaker s’ouvre immédiatement dès la première tentative lente.',
+      'HttpClient.Timeout (100 s) est la seule limite appliquée.',
+    ],
+    answer: 1,
+    explanation: `<p>Les 5 stratégies, de l’extérieur vers l’intérieur : rate limiter → <strong>total timeout</strong> (30 s) → <strong>retry</strong> (3, exponentiel + jitter, sur 408/429/5xx, <code>HttpRequestException</code> et <code>TimeoutRejectedException</code>) → <strong>circuit breaker</strong> (10 % d’échecs sur au moins 100 appels en 30 s) → <strong>attempt timeout</strong> (10 s). Une tentative lente devient donc un échec retentable, et le circuit ne s’ouvre qu’au-delà du seuil statistique.</p>`,
+    lesson: 'resilience',
+  },
+  {
+    id: 'arch-retry-storm', topic: 'architecture', level: 3, type: 'open',
+    question: 'Ton service appelle une API de paiement instable. Comment configures-tu les retries sans aggraver la panne ni débiter deux fois ?',
+    keyPoints: [
+      { text: 'Idempotence : retenter seulement ce qui est rejouable ; un POST de paiement exige une clé d’idempotence', keywords: ['idempot', 'clé', 'cle', 'doublon', 'deux fois', 'rejou'] },
+      { text: 'Backoff exponentiel + jitter, nombre de tentatives borné', keywords: ['backoff', 'exponentiel', 'jitter', 'aléa', 'alea'] },
+      { text: 'Circuit breaker : couper quand la dépendance est à terre, sonder en half-open', keywords: ['circuit', 'breaker', 'half-open', 'coupe'] },
+      { text: 'Budget de timeouts : attempt timeout × tentatives ≤ total timeout ≤ timeout de l’appelant', keywords: ['timeout', 'budget', 'délai', 'delai'] },
+      { text: 'Éviter le retry storm : retenter à un seul niveau, pas à chaque couche', keywords: ['storm', 'tempête', 'tempete', 'amplif', 'couche', 'un seul niveau'] },
+    ],
+    model: `<p>D’abord l’idempotence : un débit ne se rejoue que si le serveur reconnaît la requête, donc chaque paiement porte une clé d’idempotence générée par le client et réutilisée à chaque tentative ; sans elle, pas de retry sur le POST. Ensuite des retries bornés (3) avec backoff exponentiel et jitter, pour que tous les clients ne reviennent pas à la même milliseconde. Un circuit breaker coupe quand le taux d’échec dépasse un seuil, rejette vite pendant la coupure, puis sonde en half-open. Les timeouts forment un budget : attempt timeout × tentatives + délais ≤ total timeout ≤ timeout de mon propre appelant. Enfin, je retente à un seul niveau de la chaîne : 3 retries à chacune de 3 couches, c’est une amplification de 64 appels — un retry storm qui achève la dépendance.</p>`,
+    lesson: 'resilience',
+  },
+  {
+    id: 'net-circuit-half-open', topic: 'dotnet', level: 2, type: 'mcq',
+    question: 'Un circuit breaker Polly est Open avec BreakDuration = 5 s. Que se passe-t-il après ces 5 s ?',
+    choices: [
+      'Il repasse Closed et laisse passer tout le trafic.',
+      'Il reste Open jusqu’à un redémarrage de l’application.',
+      'Il passe HalfOpen : un appel d’essai passe ; s’il réussit le circuit se ferme, s’il échoue il se rouvre pour une nouvelle BreakDuration.',
+      'Il rejoue automatiquement les appels rejetés pendant la coupure.',
+    ],
+    answer: 2,
+    explanation: `<p>Pendant Open, les appels sont rejetés immédiatement (<code>BrokenCircuitException</code>) sans toucher la dépendance — c’est ce qui la laisse récupérer. Après <code>BreakDuration</code>, HalfOpen laisse passer une sonde : succès → Closed (<code>OnClosed</code>), échec → Open à nouveau (<code>OnOpened</code>). <code>CircuitBreakerManualControl</code> permet aussi de forcer l’état.</p>`,
+    lesson: 'resilience',
+  },
+  {
+    id: 'net-hybridcache-stampede', topic: 'dotnet', level: 2, type: 'mcq',
+    question: '10 requêtes concurrentes lisent la même clé absente du cache. Combien de fois la factory s’exécute-t-elle ?',
+    choices: [
+      'Une fois avec IMemoryCache.GetOrCreateAsync, une fois avec HybridCache.',
+      'Potentiellement 10 fois avec IMemoryCache.GetOrCreateAsync (aucun verrou), une seule fois avec HybridCache (les 9 autres attendent le même résultat).',
+      '10 fois dans les deux cas : la protection anti-stampede exige Redis.',
+      'Zéro : les deux caches renvoient null au premier miss.',
+    ],
+    answer: 1,
+    explanation: `<p><code>IMemoryCache.GetOrCreateAsync</code> fait <em>TryGetValue → factory → Set</em> sans coordination : chaque miss concurrent lance la factory, et la base prend 10 requêtes identiques au moment où une clé chaude expire. <code>HybridCache</code> coalesce les appels concurrents sur une même clé, même sans L2 ; avec un <code>IDistributedCache</code> (Redis) enregistré, il ajoute un 2ᵉ niveau partagé entre instances.</p>`,
+    lesson: 'caching',
+  },
+  {
+    id: 'net-api-breaking', topic: 'dotnet', level: 3, type: 'open',
+    question: 'Qu’est-ce qu’un breaking change d’API, et comment fais-tu évoluer un contrat sans casser les clients existants ?',
+    keyPoints: [
+      { text: 'Breaking : supprimer/renommer un champ, changer un type, rendre une entrée obligatoire, changer un statut', keywords: ['supprim', 'renomm', 'type', 'obligatoire', 'statut'] },
+      { text: 'Non breaking : ajouter un champ optionnel ou un endpoint (clients tolérants)', keywords: ['optionnel', 'ajout', 'ignor', 'toléran', 'toleran'] },
+      { text: 'Nouvelle version servie en parallèle : segment d’URL, header ou query string', keywords: ['url', 'header', 'query', 'segment', 'parallèle', 'parallele'] },
+      { text: 'Annoncer la fin : versions dépréciées, headers Deprecation et Sunset avec une date', keywords: ['déprécié', 'deprecie', 'deprecat', 'sunset', 'date'] },
+      { text: 'Documenter chaque version (OpenAPI par version) et suivre les clients restants avant d’éteindre', keywords: ['openapi', 'document', 'migration', 'suivre', 'mesur'] },
+    ],
+    model: `<p>Un breaking change, c’est tout ce qui fait échouer un client écrit contre l’ancien contrat : supprimer ou renommer un champ, changer son type, rendre une entrée obligatoire, changer un code de statut. Ajouter un champ optionnel ou un endpoint n’est pas breaking, tant que les clients ignorent les champs inconnus. Pour un vrai breaking change, je publie une v2 servie en parallèle de la v1 — par segment d’URL, header ou query string — avec les mêmes données derrière. La v1 est marquée dépréciée : headers Deprecation et Sunset avec la date d’arrêt et un lien vers la doc de migration. Chaque version a son document OpenAPI, et je mesure qui appelle encore la v1 avant de l’éteindre.</p>`,
+    lesson: 'api-versioning',
+  },
 ];
