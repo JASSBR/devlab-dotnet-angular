@@ -1,0 +1,20 @@
+<Project Sdk="Aspire.AppHost.Sdk/13.6.1">
+  <!--
+    The Aspire AppHost: a C# program that DESCRIBES the local topology (API + Angular dev server)
+    and launches it with the Aspire dashboard (logs, traces, metrics of every resource).
+    Dev-time orchestration only: the API never depends on it (dotnet run, Docker, tests still work).
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <!-- ASPIRE010: we launch with `dotnet run` and the DCP/dashboard NuGet packages, not the `aspire` CLI bundle. -->
+    <NoWarn>$(NoWarn);ASPIRE010</NoWarn>
+    <UserSecretsId>d21e2730-dfcc-42b6-bd51-356ea76cdff7</UserSecretsId>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.JavaScript" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- A ProjectReference in an AppHost = a resource (generates Projects.DevLab_Api), not a DLL dependency. -->
+    <ProjectReference Include="..\DevLab.Api\DevLab.Api.csproj" />
+  </ItemGroup>
+</Project>

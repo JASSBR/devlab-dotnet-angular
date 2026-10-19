@@ -13,7 +13,9 @@ using DevLab.Api.Features.Di;
 using DevLab.Api.Features.EfMigrations;
 using DevLab.Api.Features.Greetings;
 using DevLab.Api.Features.Linq;
+using DevLab.Api.Features.HealthChecks;
 using DevLab.Api.Features.Middleware;
+using DevLab.Api.Features.Observability;
 using DevLab.Api.Features.Products;
 using DevLab.Api.Features.Realtime;
 using DevLab.Api.Features.Resilience;
@@ -31,6 +33,13 @@ using Scalar.AspNetCore;
 // method that lives next to the feature. Read one feature folder = one lesson.
 // ─────────────────────────────────────────────────────────────────────────────
 var builder = WebApplication.CreateBuilder(args);
+
+// Lessons: Aspire ServiceDefaults + Observability + Health checks.
+// ServiceDefaults = OpenTelemetry (logs/metrics/traces, OTLP when configured) + "self" liveness check
+// + service discovery. The two lessons plug their sources, processors and checks into it.
+builder.AddServiceDefaults();
+builder.Services.AddObservabilityLesson();
+builder.Services.AddHealthChecksLesson();
 
 // Lesson: Options pattern & configuration
 builder.Services.AddLabOptions(builder.Configuration);
@@ -72,9 +81,6 @@ builder.Services.AddModules(builder.Configuration, typeof(Program).Assembly);
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
-// Deployment: a cheap endpoint the platform can poll to know the app is alive.
-builder.Services.AddHealthChecks();
-
 // The Angular dev server (:4200) proxies /api, /hubs and /idp to us, so same-origin.
 // Deployed, the SPA lives on another domain: origins come from configuration
 // (Cors__Origins__0=… as an environment variable) — never hardcode a production URL.
@@ -91,6 +97,7 @@ var app = builder.Build();
 
 // ── Pipeline order matters: read it top to bottom as a request would ──────────
 app.UseExceptionHandler();                 // 1. catch-all → ProblemDetails
+app.UseTraceparentResponseHeader();        // echo the W3C trace context on every response
 app.UseMiddleware<PipelineTraceMiddleware>("after-exception-handler");
 app.UseMiddleware<RequestTimingMiddleware>();
 app.UseCors();
@@ -101,7 +108,10 @@ app.UseMiddleware<PipelineTraceMiddleware>("after-authentication");
 app.UseAuthorization();                    // are you allowed?
 app.UseMiddleware<PipelineTraceMiddleware>("after-authorization");
 
-app.MapHealthChecks("/health");
+// Probes: /health + /alive (ServiceDefaults, liveness) and /health/live|ready|startup (lesson, JSON).
+app.MapDefaultEndpoints();
+app.MapHealthChecksLessonEndpoints();
+app.MapObservabilityEndpoints();
 app.MapOpenApi();
 app.MapScalarApiReference();               // http://localhost:5080/scalar/v1
 

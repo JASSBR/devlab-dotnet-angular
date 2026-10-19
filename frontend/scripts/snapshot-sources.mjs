@@ -24,7 +24,7 @@ const catalog = readFileSync(join(repoRoot, 'frontend/src/app/lessons/catalog.ts
 const FE = 'frontend/src/app';
 const BE = 'backend/DevLab.Api';
 const paths = new Set();
-for (const m of catalog.matchAll(/[`']([^`'$]*\$\{(FE|BE)\}[^`']*|(?:frontend|backend)\/[^`']*)[`']/g)) {
+for (const m of catalog.matchAll(/[`']([^`'$]*\$\{(FE|BE)\}[^`']*|(?:frontend|backend|docs)\/[^`']*)[`']/g)) {
   const raw = m[1];
   const path = raw.replace('${FE}', FE).replace('${BE}', BE);
   if (path === FE || path === BE) continue;   // the prefix constants themselves, not files
@@ -34,7 +34,7 @@ for (const m of catalog.matchAll(/[`']([^`'$]*\$\{(FE|BE)\}[^`']*|(?:frontend|ba
 const languageFor = p => {
   if (p.endsWith('.editorconfig')) return 'ini';
   return { '.cs': 'csharp', '.ts': 'typescript', '.html': 'xml', '.scss': 'scss', '.css': 'scss',
-           '.json': 'json', '.csproj': 'xml', '.props': 'xml', '.sql': 'sql' }[extname(p)] ?? 'plaintext';
+           '.json': 'json', '.csproj': 'xml', '.props': 'xml', '.sql': 'sql', '.md': 'markdown' }[extname(p)] ?? 'plaintext';
 };
 
 const snapshot = {};

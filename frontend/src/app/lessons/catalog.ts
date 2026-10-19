@@ -190,6 +190,18 @@ export const LESSONS: Lesson[] = [
     concepts: ['Idempotency-Key', 'IEndpointFilter', 'dual write', 'outbox', 'at-least-once', 'inbox', 'poison message'],
     files: [`${BE}/Infrastructure/Idempotency/IdempotencyFilter.cs`, `${BE}/Features/Orders/PlaceOrder/PlaceOrder.Handler.cs`, `${BE}/Infrastructure/Messaging/OutboxDispatcher.cs`, `${BE}/Infrastructure/Messaging/OutboxMessage.cs`, `${BE}/Infrastructure/Messaging/MessageContext.cs`, `${BE}/Features/Products/Events/OrderPlacedHandler.cs`, `${BE}/Infrastructure/Persistence/TransactionExtensions.cs`, `${BE}/Features/Orders/Outbox/OutboxEndpoints.cs`, 'backend/DevLab.Api.Tests/IdempotencyTests.cs', 'backend/DevLab.Api.Tests/OutboxTests.cs', `${FE}/lessons/dotnet/idempotency-outbox.ts`],
   },
+  {
+    id: 'observability', track: 'dotnet', icon: '🔭', title: 'Observabilité : logs, métriques, traces',
+    summary: 'Un checkout instrumenté (spans imbriqués, appel HttpClient, requête EF), un viewer de traces en waterfall avec ses logs corrélés, Aspire et les runbooks d’incident.',
+    concepts: ['ActivitySource', 'Activity', 'Meter', 'traceparent', 'BeginScope', 'BaseProcessor', 'OTLP', 'Aspire'],
+    files: [`${BE}/Features/Observability/CheckoutSimulator.cs`, `${BE}/Features/Observability/TelemetryStore.cs`, `${BE}/Features/Observability/ObservabilityLesson.cs`, 'backend/DevLab.ServiceDefaults/Extensions.cs', 'backend/DevLab.AppHost/Program.cs', `${FE}/lessons/dotnet/observability.ts`, 'docs/runbooks/01-api-5xx-readiness.md', 'docs/runbooks/02-latency-threadpool.md', 'docs/runbooks/03-signalr-cors-after-deploy.md'],
+  },
+  {
+    id: 'health-checks', track: 'dotnet', icon: '🩺', title: 'Health checks : liveness, readiness, startup',
+    summary: 'Trois probes filtrées par tags, un check EF Core, un check custom Degraded, un rapport JSON détaillé — et une dépendance à casser pour voir 503 vs 200.',
+    concepts: ['AddHealthChecks', 'IHealthCheck', 'tags + Predicate', 'AddDbContextCheck', 'Degraded', 'IHealthCheckPublisher', 'probes'],
+    files: [`${BE}/Features/HealthChecks/HealthChecksLesson.cs`, 'backend/DevLab.ServiceDefaults/Extensions.cs', 'backend/DevLab.Api.Tests/HealthChecksTests.cs', `${FE}/lessons/dotnet/health-checks.ts`, `${BE}/Program.cs`],
+  },
 
   // ─── Auth (full-stack) ──────────────────────────────────────────────────
   {

@@ -52,6 +52,8 @@ avec détection des points-clés dans ta réponse + auto-évaluation, explicatio
 | | Versioning d'API : URL / header / query, Deprecation + Sunset, OpenAPI par version | |
 | | Migrations EF Core : snapshot, historique, bundle, expand/contract | |
 | | Idempotence (Idempotency-Key) & outbox transactionnelle + inbox | |
+| | Observabilité : OpenTelemetry, viewer de traces, Aspire, runbooks | |
+| | Health checks : liveness, readiness, startup | |
 
 ## Déploiement
 
@@ -153,6 +155,9 @@ backend/DevLab.Api/
   Features/<Feature>/        un dossier = une leçon (endpoints + services + options)
   Features/Auth/             Jwt/ Cookie/ ApiKey/ Oidc/ Authorization/ + LabAuthentication.cs (5 schemes)
 backend/DevLab.Api.Tests/    xUnit + WebApplicationFactory
+backend/DevLab.ServiceDefaults/  Aspire : OpenTelemetry, health checks par défaut, service discovery
+backend/DevLab.AppHost/      Aspire : orchestre API + Angular, dashboard (./aspire.sh)
+docs/runbooks/               runbooks d'incident (5xx/readiness, latence, SignalR/CORS)
 frontend/src/app/
   lessons/catalog.ts         la liste des leçons et les fichiers qu'elles affichent
   lessons/{angular,dotnet,auth}/  un fichier = une leçon

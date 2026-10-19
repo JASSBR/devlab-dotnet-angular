@@ -7,6 +7,7 @@ WORKDIR /src
 # so a code-only edit skips the (slow) restore entirely.
 COPY backend/Directory.Build.props backend/Directory.Packages.props backend/.editorconfig ./
 COPY backend/DevLab.Api/DevLab.Api.csproj DevLab.Api/
+COPY backend/DevLab.ServiceDefaults/DevLab.ServiceDefaults.csproj DevLab.ServiceDefaults/
 RUN dotnet restore DevLab.Api/DevLab.Api.csproj
 
 COPY backend/ ./
@@ -24,6 +25,7 @@ COPY --from=build /app/publish ./
 COPY backend/ ./backend/
 COPY frontend/src/ ./frontend/src/
 COPY frontend/proxy.conf.json ./frontend/
+COPY docs/ ./docs/
 
 # SQLite files live in a dedicated directory owned by the non-root app user.
 RUN mkdir -p /data && chown -R app:app /data /app

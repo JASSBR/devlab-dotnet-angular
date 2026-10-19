@@ -22,6 +22,7 @@ import { RequestLog } from '../core/http/request-log.interceptor';
           <span class="ms muted">{{ e.durationMs ?? '' }}{{ e.durationMs !== undefined ? ' ms' : '' }}</span>
           <span class="headers mono muted">
             @for (h of e.headers | keyvalue; track h.key) { <span>{{ h.key }}: {{ h.value }}</span> }
+            @if (e.traceparent) { <span class="trace" title="Réponse : contexte W3C du span serveur">← traceparent: {{ e.traceparent }}</span> }
             @if (e.error) { <span class="error">{{ e.error }}</span> }
           </span>
         </div>
@@ -41,6 +42,7 @@ import { RequestLog } from '../core/http/request-log.interceptor';
     .status { font-weight: 700; } .status.ok { color: var(--ok); } .status.ko { color: var(--err); }
     .headers { grid-column: 2 / -1; display: flex; gap: 1rem; flex-wrap: wrap; font-size: .72rem; }
     .error { color: #fca5a5; }
+    .trace { color: var(--brand-2); }
     .empty { padding: 2rem; text-align: center; }
   `],
   imports: [KeyValuePipe],
