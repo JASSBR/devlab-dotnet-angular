@@ -15,8 +15,10 @@ using DevLab.Api.Features.Linq;
 using DevLab.Api.Features.Middleware;
 using DevLab.Api.Features.Products;
 using DevLab.Api.Features.Realtime;
+using DevLab.Api.Features.Resilience;
 using DevLab.Api.Features.SourceCode;
 using DevLab.Api.Features.Validation;
+using DevLab.Api.Features.Versioning;
 using DevLab.Api.Infrastructure;
 using DevLab.Api.Infrastructure.Modules;
 using Scalar.AspNetCore;
@@ -51,6 +53,9 @@ builder.Services.AddCachingLesson();
 
 // Lesson: Async & concurrency (WhenAll, SemaphoreSlim, Channels, IAsyncEnumerable, ThreadPool)
 builder.Services.AddAsyncConcurrencyLesson();
+// Lessons (production APIs): Resilience (Polly v8 pipelines) + API versioning (+ OpenAPI "v2")
+builder.Services.AddResilienceLesson();
+builder.Services.AddApiVersioningLesson();
 
 // Lesson: Authentication (JWT, Cookie, API key, OIDC) + Authorization policies
 builder.Services.AddLabUsers();
@@ -106,6 +111,8 @@ app.MapValidationEndpoints();
 app.MapRealtimeEndpoints();
 app.MapCachingEndpoints();
 app.MapAsyncConcurrencyEndpoints();
+app.MapResilienceEndpoints();
+app.MapApiVersioningEndpoints();
 app.MapConfigEndpoints();
 // Lessons: C# fundamentals + Collections & LINQ (pure functions, no services to register)
 app.MapCSharpEndpoints();

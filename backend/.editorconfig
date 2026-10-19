@@ -30,6 +30,12 @@ dotnet_diagnostic.S1118.severity = none
 dotnet_diagnostic.CA1716.severity = none
 dotnet_diagnostic.CA1711.severity = none
 dotnet_diagnostic.CA1000.severity = none
+# Asp.Versioning nudges: only the "people" endpoints of the API-versioning lesson are versioned, on
+# purpose. Versioning the controllers (AV0013) or generating one OpenAPI document per version for the
+# whole app (AV0029/AV0030) would copy every unversioned lab endpoint into each version's document.
+dotnet_diagnostic.AV0013.severity = none
+dotnet_diagnostic.AV0029.severity = none
+dotnet_diagnostic.AV0030.severity = none
 
 # ── Downgraded to suggestion: valid, but not worth failing the build in a lab ─
 # Culture-sensitive string APIs (StringComparison / IFormatProvider overloads).

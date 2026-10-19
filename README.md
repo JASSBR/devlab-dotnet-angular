@@ -39,7 +39,7 @@ avec détection des points-clés dans ta réponse + auto-évaluation, explicatio
 | Reactive Forms typés (+ validateur async) | EF Core + SQLite (CRUD paginé) | OAuth2/OIDC Authorization Code + PKCE (IdP embarqué) |
 | Injection de dépendances | Validation (FluentValidation + endpoint filter) | Authorization : rôles, claims, policies, resource-based |
 | Interceptors HTTP (refresh auto sur 401) | SignalR + BackgroundService | |
-| Control flow, @defer, zoneless | Cache (IMemoryCache, OutputCache) + rate limiting | |
+| Control flow, @defer, zoneless | Cache (IMemoryCache, OutputCache, HybridCache anti-stampede) + rate limiting | |
 | Composants (input/output/model, viewChild, hostDirectives) | Options pattern & configuration | |
 | Directives & pipes custom | Tests d'intégration xUnit (+ tests d'architecture NetArchTest) | |
 | | Setup pro : Directory.Build.props, CPM, analyzers, triage | |
@@ -48,6 +48,8 @@ avec détection des points-clés dans ta réponse + auto-évaluation, explicatio
 | | C# pour qui vient de TypeScript (patterns, struct vs class, records, génériques) | |
 | | Collections & LINQ (HashSet benchmark, deferred execution tracée) | |
 | | Async & concurrence : WhenAll, SemaphoreSlim, Channels, IAsyncEnumerable, annulation, ThreadPool | |
+| | Résilience : retries, timeouts, circuit breaker (Polly v8) | |
+| | Versioning d'API : URL / header / query, Deprecation + Sunset, OpenAPI par version | |
 
 ## Déploiement
 
