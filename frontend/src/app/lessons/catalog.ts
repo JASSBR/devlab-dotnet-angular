@@ -77,6 +77,18 @@ export const LESSONS: Lesson[] = [
 
   // ─── .NET ───────────────────────────────────────────────────────────────
   {
+    id: 'csharp-fundamentals', track: 'dotnet', icon: '🔤', title: 'C# pour qui vient de TypeScript',
+    summary: 'var, switch expressions et patterns, exceptions filtrées, struct vs class (copie prouvée en live), records, génériques contraints, composition plutôt qu’héritage.',
+    concepts: ['switch expression', 'list pattern', 'catch when', 'struct vs class', 'record / with', 'where T :', '[Flags]', 'string?'],
+    files: [`${BE}/Features/CSharp/ValueSemantics.cs`, `${BE}/Features/CSharp/Patterns.cs`, `${BE}/Features/CSharp/Errors.cs`, `${BE}/Features/CSharp/Basics.cs`, `${BE}/Features/CSharp/TypeSystem.cs`, `${BE}/Features/CSharp/CSharpLesson.cs`, `${FE}/lessons/dotnet/csharp-fundamentals.ts`],
+  },
+  {
+    id: 'collections-linq', track: 'dotnet', icon: '🔗', title: 'Collections & LINQ',
+    summary: 'List / Dictionary / HashSet (benchmark live), exposer en lecture seule, les opérateurs LINQ, et la deferred execution tracée élément par élément.',
+    concepts: ['IReadOnlyList', 'TryGetValue', 'HashSet', 'yield return', 'deferred execution', 'First vs FirstOrDefault', 'GroupBy', 'Chunk'],
+    files: [`${BE}/Features/Linq/DeferredExecution.cs`, `${BE}/Features/Linq/Collections.cs`, `${BE}/Features/Linq/LinqLesson.cs`, `${FE}/lessons/dotnet/collections-linq.ts`],
+  },
+  {
     id: 'minimal-vs-controllers', track: 'dotnet', icon: '🚪', title: 'Minimal API vs Controllers',
     summary: 'Le même endpoint écrit deux fois. Binding, TypedResults, OpenAPI & Scalar.',
     concepts: ['MapGet', 'MapGroup', '[ApiController]', 'TypedResults', 'OpenAPI'],

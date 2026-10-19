@@ -682,4 +682,55 @@ export const QUESTIONS: Question[] = [
     ],
     model: `<p>Le cœur : ne jamais envoyer une notification dans la requête HTTP qui la déclenche. Les modules métier publient un message (« commande confirmée ») dans une file ; un service de notifications le consomme, résout les préférences de l’utilisateur (canaux, opt-out, langue), rend un template, et appelle le fournisseur (SendGrid, Twilio, FCM) via un adaptateur par canal. Chaque envoi porte une clé d’idempotence — un retry ne doit jamais doubler un SMS. Les échecs partent en retry avec backoff, puis en dead-letter queue pour analyse. Les fournisseurs ont des quotas : un rate limiter par fournisseur. Et chaque notification a un statut persisté (queued, sent, failed, delivered via webhook) corrélé par traceId, avec des métriques d’échec qui alertent.</p>`,
   },
+  // ── csharp-fundamentals, collections-linq ──
+  {
+    id: 'net-struct-copy', topic: 'dotnet', level: 1, type: 'mcq',
+    question: 'struct Point { public int X { get; set; } } — après var a = new Point { X = 1 }; var b = a; b.X = 2; que vaut a.X ?',
+    choices: [
+      '2 : a et b désignent le même objet.',
+      '1 : une struct est un type valeur, l’affectation copie toutes ses données.',
+      'Erreur de compilation : une struct ne peut pas être modifiée.',
+      'Ça dépend si Point est déclaré dans le tas ou la pile.',
+    ],
+    answer: 1,
+    explanation: `<p><code>struct</code> = type <strong>valeur</strong> : la variable contient les données, <code>b = a</code> les copie (idem au passage en paramètre). Avec une <code>class</code>, <code>b = a</code> copie la <em>référence</em> → <code>a.X</code> vaudrait 2, comme un objet en TypeScript. D’où la règle : structs petites et immuables (<code>readonly struct</code>), sinon les copies silencieuses surprennent.</p>`,
+    lesson: 'csharp-fundamentals',
+  },
+  {
+    id: 'net-record-class-struct', topic: 'dotnet', level: 2, type: 'open',
+    question: 'class, struct, record, record struct : comment choisis-tu ?',
+    keyPoints: [
+      { text: 'class : type référence, identité, état mutable et comportement (entités, services)', keywords: ['référence', 'reference', 'identité', 'identite', 'service', 'entité', 'entite'] },
+      { text: 'struct : type valeur copié à chaque affectation ; petit, immuable (readonly struct)', keywords: ['valeur', 'copi', 'readonly struct', 'immuable', 'petit'] },
+      { text: 'record : égalité par valeur générée, with pour une copie non destructive ; idéal pour DTO / value objects', keywords: ['égalité', 'egalite', 'with', 'dto', 'value object'] },
+      { text: 'record struct : égalité par valeur sans allocation sur le tas', keywords: ['record struct', 'allocation', 'tas', 'heap'] },
+    ],
+    model: `<p>Par défaut une <strong>class</strong> : type référence, avec une identité — deux instances aux mêmes valeurs restent deux objets — c’est ce qu’il faut pour une entité ou un service. Un <strong>record</strong> quand l’objet <em>est</em> ses valeurs : le compilateur génère l’égalité par valeur, <code>ToString</code>, la déconstruction et <code>with</code> pour une copie non destructive — parfait pour les DTO, les messages, les value objects. Une <strong>struct</strong> seulement pour une petite donnée immuable (<code>readonly struct</code>, comme <code>Guid</code>) : c’est un type valeur, copié à chaque affectation ou passage en paramètre, donc une grosse struct mutable crée des bugs de copie et coûte cher. Le <strong>record struct</strong> combine les deux : égalité par valeur et pas d’allocation sur le tas, utile en chemin chaud.</p>`,
+    lesson: 'csharp-fundamentals',
+  },
+  {
+    id: 'net-linq-deferred', topic: 'dotnet', level: 2, type: 'mcq',
+    question: 'var q = list.Where(x => x > 1); list.Add(5); var n = q.Count(); — sachant que list valait [1, 2, 3], que vaut n ?',
+    choices: [
+      '2 : Where a filtré la liste au moment où il a été appelé.',
+      '3 : la requête est paresseuse, elle s’exécute au Count() et voit le 5 ajouté.',
+      'InvalidOperationException : la collection a été modifiée.',
+      '4 : Count() compte la liste source.',
+    ],
+    answer: 1,
+    explanation: `<p><code>Where</code> ne fait que construire un itérateur (deferred execution) ; rien n’est lu avant l’énumération par <code>Count()</code>, qui parcourt la liste <em>telle qu’elle est à ce moment-là</em> : [2, 3, 5]. L’exception « collection was modified » n’arrive que si on modifie la liste <em>pendant</em> l’énumération. Pour figer un résultat : <code>ToList()</code>.</p>`,
+    lesson: 'collections-linq',
+  },
+  {
+    id: 'net-multiple-enumeration', topic: 'dotnet', level: 2, type: 'open',
+    question: 'Ton analyseur signale « possible multiple enumeration of IEnumerable ». Quel est le risque et que fais-tu ?',
+    keyPoints: [
+      { text: 'Un IEnumerable est paresseux : chaque énumération ré-exécute tout le pipeline', keywords: ['paresseu', 'lazy', 'deferred', 'ré-exécut', 're-execut', 'rejou'] },
+      { text: 'Coût ou effets de bord : source relue (fichier, HTTP, SQL avec IQueryable), résultats potentiellement différents', keywords: ['sql', 'requête', 'requete', 'http', 'fichier', 'effet', 'différent', 'different', 'coût', 'cout'] },
+      { text: 'Matérialiser une seule fois avec ToList() / ToArray()', keywords: ['tolist', 'toarray', 'matérialis', 'materialis'] },
+      { text: 'Typer les paramètres en IReadOnlyCollection / IReadOnlyList quand on doit relire', keywords: ['ireadonly', 'readonlylist', 'readonlycollection', 'signature'] },
+    ],
+    model: `<p>Un <code>IEnumerable</code> n’est pas une collection mais une recette paresseuse (deferred execution) : chaque <code>foreach</code>, <code>Count()</code> ou <code>Any()</code> ré-exécute tout le pipeline depuis la source. Si la source est coûteuse ou a des effets — fichier relu, appel HTTP refait, requête SQL rejouée avec un <code>IQueryable</code> EF Core — on paie deux fois, et les deux résultats peuvent même être différents. Je matérialise une seule fois avec <code>ToList()</code> ou <code>ToArray()</code> avant de relire, et quand une méthode a besoin de parcourir plusieurs fois, je type son paramètre en <code>IReadOnlyCollection&lt;T&gt;</code> ou <code>IReadOnlyList&lt;T&gt;</code> : la signature dit au caller « donne-moi des données déjà en mémoire ».</p>`,
+    lesson: 'collections-linq',
+  },
 ];
