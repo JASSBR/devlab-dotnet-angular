@@ -62,3 +62,9 @@ MA0051.maximum_lines_per_method = 120
 [DevLab.Api.Tests/**.cs]
 # Snake_case test names (Given_When_Then style) are the norm in xUnit projects.
 dotnet_diagnostic.CA1707.severity = none
+
+# ── EF Core migrations: tool output, regenerated rather than hand-edited ──────
+# generated_code = true makes every analyzer (IDE, CA, Meziantou, Sonar) skip these files,
+# instead of reformatting tool output by hand or sprinkling #pragma in it.
+[DevLab.Api/Features/*/Migrations/*.cs]
+generated_code = true

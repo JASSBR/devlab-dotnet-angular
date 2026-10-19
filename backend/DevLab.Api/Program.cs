@@ -10,6 +10,7 @@ using DevLab.Api.Features.Caching;
 using DevLab.Api.Features.Config;
 using DevLab.Api.Features.CSharp;
 using DevLab.Api.Features.Di;
+using DevLab.Api.Features.EfMigrations;
 using DevLab.Api.Features.Greetings;
 using DevLab.Api.Features.Linq;
 using DevLab.Api.Features.Middleware;
@@ -20,6 +21,7 @@ using DevLab.Api.Features.SourceCode;
 using DevLab.Api.Features.Validation;
 using DevLab.Api.Features.Versioning;
 using DevLab.Api.Infrastructure;
+using DevLab.Api.Infrastructure.Idempotency;
 using DevLab.Api.Infrastructure.Modules;
 using Scalar.AspNetCore;
 
@@ -81,7 +83,9 @@ builder.Services.AddCors(o => o.AddDefaultPolicy(p => p
     .WithOrigins(corsOrigins)
     .AllowAnyHeader()
     .AllowAnyMethod()
-    .AllowCredentials()));
+    .AllowCredentials()
+    // Cross-origin, JS only sees "safe" response headers unless they are exposed explicitly.
+    .WithExposedHeaders(IdempotencyHeaders.Replayed)));
 
 var app = builder.Build();
 
@@ -107,6 +111,7 @@ app.MapGreetingsEndpoints();
 app.MapDiEndpoints();
 app.MapMiddlewareEndpoints();
 app.MapProductsEndpoints();
+app.MapMigrationsEndpoints();
 app.MapValidationEndpoints();
 app.MapRealtimeEndpoints();
 app.MapCachingEndpoints();
@@ -125,7 +130,7 @@ app.MapAuthorizationEndpoints();
 app.MapWhoAmIEndpoint();
 app.MapApiEndpoints(typeof(Program).Assembly);   // every IApiEndpoint slice, discovered by scanning
 
-await app.Services.SeedDatabaseAsync();
+await app.Services.MigrateAndSeedAsync();   // applies EF Core migrations, then seeds (see DbSeeder for why only in a lab)
 
 await app.RunAsync();
 

@@ -1,3 +1,4 @@
+using DevLab.Api.Infrastructure.Messaging;
 using Microsoft.EntityFrameworkCore;
 
 namespace DevLab.Api.Features.Products;
@@ -5,6 +6,7 @@ namespace DevLab.Api.Features.Products;
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
     public DbSet<Product> Products => Set<Product>();
+    public DbSet<InboxRecord> InboxRecords => Set<InboxRecord>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -18,5 +20,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             e.HasIndex(p => p.Category);        // we filter by category → index it
             e.HasIndex(p => p.Name);
         });
+        // Products consumes Orders' events at-least-once: it remembers what it already handled.
+        modelBuilder.AddInbox();
     }
 }

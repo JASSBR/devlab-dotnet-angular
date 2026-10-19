@@ -2,7 +2,8 @@ using DevLab.Api.Features.Orders.PublicApi;
 using DevLab.Api.Features.Orders.Shared;
 using DevLab.Api.Features.Products.PublicApi;
 using DevLab.Api.Infrastructure;
-using DevLab.Api.Infrastructure.Events;
+using DevLab.Api.Infrastructure.Messaging;
+using DevLab.Api.Infrastructure.Persistence;
 
 namespace DevLab.Api.Features.Orders.PlaceOrder;
 
@@ -10,7 +11,7 @@ namespace DevLab.Api.Features.Orders.PlaceOrder;
 /// All the business logic of "place an order", readable top to bottom. Depends on the
 /// Products module ONLY through IProductCatalog (its PublicApi) — never on its DbContext.
 /// </summary>
-public sealed class PlaceOrderHandler(OrdersDbContext db, IProductCatalog catalog, IEventBus events)
+public sealed class PlaceOrderHandler(OrdersDbContext db, IProductCatalog catalog)
 {
     public async Task<Result<OrderDto>> HandleAsync(PlaceOrderRequest request, string customerName, CancellationToken ct)
     {
@@ -29,12 +30,16 @@ public sealed class PlaceOrderHandler(OrdersDbContext db, IProductCatalog catalo
             UnitPrice = product.Price,
             Quantity = request.Quantity,
         };
-        db.Orders.Add(order);
-        await db.SaveChangesAsync(ct);
 
-        // Published AFTER persistence: subscribers must never see an order that does not exist yet.
-        await events.PublishAsync(new OrderPlaced(order.Id, order.ProductId, order.Quantity, customerName), ct);
-
-        return OrderDto.From(order);
+        // Transactional outbox: the order and its OrderPlaced event commit together, or not at all.
+        // Publishing to a bus here instead would be a dual write: order saved + crash = event lost forever.
+        return await db.InTransactionAsync(async () =>
+        {
+            db.Orders.Add(order);
+            await db.SaveChangesAsync(ct);   // assigns order.Id, which the event carries
+            db.OutboxMessages.Add(OutboxMessage.From(new OrderPlaced(order.Id, order.ProductId, order.Quantity, customerName)));
+            await db.SaveChangesAsync(ct);
+            return Result<OrderDto>.Success(OrderDto.From(order));
+        }, ct);
     }
 }

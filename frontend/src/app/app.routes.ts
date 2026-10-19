@@ -54,6 +54,8 @@ export const routes: Routes = [
   { path: 'lessons/project-setup', loadComponent: () => import('./lessons/dotnet/project-setup').then(m => m.ProjectSetupLesson) },
   { path: 'lessons/vertical-slice', loadComponent: () => import('./lessons/dotnet/vertical-slice').then(m => m.VerticalSliceLesson) },
   { path: 'lessons/modular-monolith', loadComponent: () => import('./lessons/dotnet/modular-monolith').then(m => m.ModularMonolithLesson) },
+  { path: 'lessons/ef-migrations', loadComponent: () => import('./lessons/dotnet/ef-migrations').then(m => m.EfMigrationsLesson), title: 'Migrations EF Core' },
+  { path: 'lessons/idempotency-outbox', loadComponent: () => import('./lessons/dotnet/idempotency-outbox').then(m => m.IdempotencyOutboxLesson), title: 'Idempotence & Outbox' },
   { path: 'lessons/testing', loadComponent: () => import('./lessons/dotnet/testing').then(m => m.TestingLesson) },
 
   // ── Auth ─────────────────────────────────────────────────────────────────

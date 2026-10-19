@@ -50,6 +50,8 @@ avec détection des points-clés dans ta réponse + auto-évaluation, explicatio
 | | Async & concurrence : WhenAll, SemaphoreSlim, Channels, IAsyncEnumerable, annulation, ThreadPool | |
 | | Résilience : retries, timeouts, circuit breaker (Polly v8) | |
 | | Versioning d'API : URL / header / query, Deprecation + Sunset, OpenAPI par version | |
+| | Migrations EF Core : snapshot, historique, bundle, expand/contract | |
+| | Idempotence (Idempotency-Key) & outbox transactionnelle + inbox | |
 
 ## Déploiement
 
@@ -109,6 +111,14 @@ cd frontend && npm start
 
 ou en une commande : `./dev.sh`.
 
+Le schéma SQLite vient de **migrations EF Core**, appliquées au démarrage (`MigrateAsync`, acceptable pour un lab
+mono-instance — voir la leçon *Migrations EF Core*). Pour en créer une :
+
+```bash
+dotnet tool restore              # dotnet-ef épinglé dans dotnet-tools.json (même version qu'EF Core)
+dotnet ef migrations add <Nom> --project backend/DevLab.Api --context OrdersDbContext --output-dir Features/Orders/Migrations
+```
+
 ## Tester
 
 ```bash
@@ -135,7 +145,9 @@ backend/
   .editorconfig              style + triage des analyzers (chaque exception est justifiée)
 backend/DevLab.Api/
   Program.cs                 composition root : chaque feature s'enregistre via une extension method
-  Infrastructure/            Result<T>, IModule/IApiEndpoint (scan), InProcessEventBus
+  Infrastructure/            Result<T>, IModule/IApiEndpoint (scan), InProcessEventBus,
+                             Messaging/ (outbox, dispatcher, inbox), Idempotency/ (IdempotencyFilter)
+  Features/*/Migrations/     migrations EF Core de chaque module (générées, exclues des analyzers)
   Features/Orders/           module en vertical slices (PlaceOrder/, GetOrders/, CancelOrder/, PublicApi/, Shared/)
   Features/Products/PublicApi/  le seul contrat que les autres modules voient (IProductCatalog)
   Features/<Feature>/        un dossier = une leçon (endpoints + services + options)

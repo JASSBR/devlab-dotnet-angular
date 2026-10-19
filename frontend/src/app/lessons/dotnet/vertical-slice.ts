@@ -20,7 +20,7 @@ export interface OrderDto { id: number; customerName: string; productId: number;
         <diagram-slices />
         <p>Une <strong>slice</strong> = un cas d'usage (« passer une commande ») avec tout ce qu'il lui faut, côte à côte :
         <code>PlaceOrder.Endpoint.cs</code> (HTTP, mince), <code>PlaceOrder.Handler.cs</code> (la logique métier, lisible de haut en bas),
-        <code>PlaceOrder.Validator.cs</code> (la forme de la requête). Pas de MediatR : le handler est une classe injectée et appelée. Pas de repository : le handler parle au <code>DbContext</code>.</p>
+        <code>PlaceOrder.Validator.cs</code> (la forme de la requête). Les préoccupations transverses sont des <em>endpoint filters</em> branchés sur la slice : validation, puis idempotence (<code>IdempotencyFilter</code>). Pas de MediatR : le handler est une classe injectée et appelée. Pas de repository : le handler parle au <code>DbContext</code>.</p>
         <h3>Result&lt;T&gt; plutôt que des exceptions</h3>
         <p>« Produit introuvable » ou « stock insuffisant » ne sont pas des <em>bugs</em>, ce sont des <em>résultats normaux</em>. Le handler retourne <code>Result&lt;OrderDto&gt;</code> ;
         l'endpoint fait <code>result.Match(created, error.ToProblem())</code>. Chaque <code>Error</code> a un <strong>code stable</strong> (<code>orders.insufficient_stock</code>) : les tests

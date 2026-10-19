@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthStore } from '../../core/auth/auth.store';
+import { RouterLink } from '@angular/router';
 import { LessonShell } from '../../shared/lesson-shell';
 import { lessonById } from '../catalog';
 import { Product } from '../angular/cart.store';
@@ -11,7 +12,7 @@ interface Paged { items: Product[]; page: number; pageSize: number; total: numbe
 
 @Component({
   selector: 'lesson-ef-core',
-  imports: [LessonShell, ReactiveFormsModule, CurrencyPipe],
+  imports: [LessonShell, ReactiveFormsModule, CurrencyPipe, RouterLink],
   template: `
     <lesson-shell [lesson]="lesson">
       <div explain>
@@ -24,7 +25,7 @@ interface Paged { items: Product[]; page: number; pageSize: number; total: numbe
           <li>Écriture : charger l'entité (trackée), modifier, <code>SaveChangesAsync()</code> → EF calcule l'<code>UPDATE</code>.</li>
           <li><code>ExecuteDeleteAsync()</code> : un <code>DELETE</code> direct, sans charger.</li>
           <li>Les DTOs isolent le contrat API du schéma : on n'expose jamais l'entité.</li>
-          <li>Migrations : <code>dotnet ef migrations add Init</code> + <code>dotnet ef database update</code> (ici <code>EnsureCreated</code> pour rester simple).</li>
+          <li>Le schéma vient de vraies migrations (<code>dotnet ef migrations add</code>, appliquées au démarrage par <code>MigrateAsync</code>) — voir la leçon <a routerLink="/lessons/ef-migrations">Migrations EF Core</a>.</li>
         </ul>
         <div class="callout">Créer/modifier demande la permission <code>products:write</code> (alice, bob) ; supprimer demande le rôle <code>Admin</code> (alice). Carol peut seulement lire → observe les 401/403.</div>
       </div>
