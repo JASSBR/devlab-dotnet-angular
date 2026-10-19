@@ -1,4 +1,6 @@
 <Solution>
   <Project Path="DevLab.Api.Tests/DevLab.Api.Tests.csproj" />
   <Project Path="DevLab.Api/DevLab.Api.csproj" />
+  <Project Path="DevLab.AotDemo/DevLab.AotDemo.csproj" />
+  <Project Path="DevLab.Benchmarks/DevLab.Benchmarks.csproj" />
 </Solution>

@@ -682,4 +682,57 @@ export const QUESTIONS: Question[] = [
     ],
     model: `<p>Le cœur : ne jamais envoyer une notification dans la requête HTTP qui la déclenche. Les modules métier publient un message (« commande confirmée ») dans une file ; un service de notifications le consomme, résout les préférences de l’utilisateur (canaux, opt-out, langue), rend un template, et appelle le fournisseur (SendGrid, Twilio, FCM) via un adaptateur par canal. Chaque envoi porte une clé d’idempotence — un retry ne doit jamais doubler un SMS. Les échecs partent en retry avec backoff, puis en dead-letter queue pour analyse. Les fournisseurs ont des quotas : un rate limiter par fournisseur. Et chaque notification a un statut persisté (queued, sent, failed, delivered via webhook) corrélé par traceId, avec des métriques d’échec qui alertent.</p>`,
   },
+  // ── performance-runtime ──
+  {
+    id: 'dotnet-perf-span', topic: 'dotnet', level: 3, type: 'mcq',
+    question: 'Parser une ligne CSV avec ReadOnlySpan<char> + int.Parse(span) alloue ~0 octet, contre ~240 octets avec Substring + int.Parse(string). Pourquoi ?',
+    choices: [
+      'Parce que le JIT met les strings issues de Substring en cache (interning).',
+      'Parce qu’un span est une vue (référence + longueur) sur la mémoire existante : le slicing ne copie rien, alors que chaque Substring crée une nouvelle string sur le heap.',
+      'Parce que ReadOnlySpan<char> est alloué sur le Large Object Heap, qui n’est pas compté.',
+      'Parce qu’int.Parse(span) est asynchrone et libère le thread.',
+    ],
+    answer: 1,
+    explanation: `<p><code>Span&lt;T&gt;</code> est un <code>ref struct</code> : il vit sur la pile, ne peut pas être boxé ni capturé par une lambda ou un <code>async</code>, et pointe sur une mémoire qui existe déjà (string, tableau, <code>stackalloc</code>, mémoire native). <code>line[..comma]</code> ne fait que déplacer le pointeur et la longueur. Avec <code>Substring</code>, chaque champ devient un objet de ~30 octets qui meurt aussitôt : du travail pour le GC (gen0). Mesuré dans la leçon : 240 B/ligne → 0 B/ligne, même résultat. Pour traverser un <code>await</code>, on passe à <code>Memory&lt;T&gt;</code>.</p>`,
+    lesson: 'performance-runtime',
+  },
+  {
+    id: 'dotnet-perf-diagnose', topic: 'dotnet', level: 3, type: 'open',
+    question: 'En production, la latence p99 d’une API .NET explose sous charge et la mémoire grimpe. Comment mènes-tu l’enquête ?',
+    keyPoints: [
+      { text: 'Mesurer avant de toucher au code : dotnet-counters (allocation rate, time in GC, taille du heap, file du thread pool)', keywords: ['dotnet-counters', 'compteur', 'counter', 'métrique', 'metrique', 'time in gc', 'thread pool', 'threadpool'] },
+      { text: 'Trouver où part le temps : dotnet-trace / profiler, flame graph (Speedscope, PerfView, Visual Studio)', keywords: ['dotnet-trace', 'trace', 'profiler', 'profil', 'flame', 'speedscope', 'perfview'] },
+      { text: 'Mémoire qui grimpe : distinguer fuite et pression d’allocation — dotnet-gcdump / dotnet-dump, comparer deux snapshots', keywords: ['gcdump', 'dotnet-dump', 'dump', 'fuite', 'leak', 'snapshot'] },
+      { text: 'Causes classiques : allocations en boucle chaude (LOH, strings, LINQ), sync-over-async / thread pool starvation, cache sans limite', keywords: ['allocation', 'loh', 'sync-over-async', '.result', 'starvation', 'famine', 'cache'] },
+      { text: 'Corriger et prouver : BenchmarkDotNet avec MemoryDiagnoser, puis comparer les métriques avant/après en charge', keywords: ['benchmarkdotnet', 'memorydiagnoser', 'benchmark', 'avant/après', 'avant et après', 'comparer'] },
+    ],
+    model: `<p>D’abord je mesure, sans hypothèse : <code>dotnet-counters monitor</code> sur le process en charge me donne le taux d’allocation, le temps passé dans le GC, la taille du heap par génération et la longueur de la file du thread pool. Une file qui grossit avec peu de CPU évoque du sync-over-async (<code>.Result</code>) et une starvation du thread pool ; un time in GC élevé avec beaucoup de collections gen2 évoque une pression d’allocation, souvent des gros buffers sur le LOH. Ensuite <code>dotnet-trace</code> en échantillonnage, ouvert en flame graph dans Speedscope ou PerfView, montre où part le temps. Si la mémoire ne redescend jamais, c’est peut-être une fuite : deux <code>dotnet-gcdump</code> à quelques minutes d’intervalle, comparés, désignent le type qui s’accumule (souvent un cache sans limite ou un abonnement jamais retiré). Je corrige le point chaud (Span, ArrayPool, moins de LINQ dans la boucle), je prouve le gain avec BenchmarkDotNet et <code>[MemoryDiagnoser]</code>, puis je compare les métriques avant/après sous la même charge.</p>`,
+    lesson: 'performance-runtime',
+  },
+  {
+    id: 'dotnet-perf-tiering', topic: 'dotnet', level: 3, type: 'mcq',
+    question: 'Juste après chaque déploiement, les premières requêtes d’un endpoint sont nettement plus lentes, puis tout se stabilise. L’explication la plus probable côté runtime ?',
+    choices: [
+      'Le GC Server alloue un heap par cœur au démarrage et bloque les requêtes.',
+      'La compilation à plusieurs niveaux : le code démarre en tier-0 (compilé vite, non optimisé), puis les méthodes chaudes sont recompilées en tier-1 avec Dynamic PGO, en arrière-plan.',
+      'Kestrel désactive HTTP/2 tant que le pool de connexions n’est pas plein.',
+      'Le JIT interprète l’IL pendant les 30 premières secondes.',
+    ],
+    answer: 1,
+    explanation: `<p>Chaque méthode est d’abord compilée en tier-0 (ou prise précompilée en ReadyToRun pour le framework). Après 30 appels — et 100 ms sans nouvelle compilation tier-0 — elle est recompilée en tier-1, optimisée et guidée par le profil collecté (Dynamic PGO, activé par défaut depuis .NET 8 : dévirtualisation gardée, inlining, blocs froids sortis). Une méthode avec une boucle longue passe en cours d’exécution sur une version optimisée grâce à l’OSR. Mesuré dans la leçon : tier-0 ≈ 10 ns/appel → tier-1 ≈ 4,8 ns. Remèdes : un warm-up avant de recevoir le trafic (readiness probe), <code>PublishReadyToRun</code>, ou Native AOT si le démarrage prime sur le débit maximal.</p>`,
+    lesson: 'performance-runtime',
+  },
+  {
+    id: 'dotnet-perf-aot', topic: 'dotnet', level: 3, type: 'open',
+    question: 'Native AOT pour une API ASP.NET Core : quand l’adopter, et quels compromis acceptes-tu ?',
+    keyPoints: [
+      { text: 'Gains : démarrage en quelques ms, mémoire plus faible, un seul binaire — idéal serverless, scale-to-zero, conteneurs denses, CLI', keywords: ['démarrage', 'demarrage', 'startup', 'mémoire', 'memoire', 'serverless', 'scale-to-zero', 'conteneur', 'container', 'binaire'] },
+      { text: 'Contraintes : pas de génération de code à l’exécution, réflexion limitée, trimming → warnings à traiter', keywords: ['réflexion', 'reflexion', 'reflection', 'trimming', 'trim', 'warning', 'dynamique', 'emit'] },
+      { text: 'Remplacer la réflexion par des source generators : JsonSerializerContext, Request Delegate Generator des minimal APIs', keywords: ['source generator', 'générateur', 'generateur', 'jsonserializercontext', 'source-gen', 'createslimbuilder'] },
+      { text: 'Compatibilité de l’écosystème : MVC/controllers non supportés, EF Core et certaines libs partiellement', keywords: ['controller', 'mvc', 'ef core', 'compatib', 'librairie', 'bibliothèque', 'bibliotheque'] },
+      { text: 'Coût : build long, binaire par OS/architecture, toolchain native ; débit maximal parfois inférieur au JIT avec Dynamic PGO', keywords: ['build', 'plateforme', 'architecture', 'toolchain', 'clang', 'débit', 'debit', 'throughput', 'pgo'] },
+    ],
+    model: `<p>J’adopte Native AOT quand le démarrage et la mémoire comptent plus que le débit maximal : fonctions serverless, services en scale-to-zero, conteneurs très denses, outils CLI. Sur ce lab, le binaire répond en ≈ 110 ms contre ≈ 225 ms pour la version JIT, avec 24 Mo de mémoire au lieu de 83. Le prix : aucune génération de code à l’exécution et une réflexion limitée, car le trimming retire ce qui n’est pas référencé statiquement. Chaque warning de trimming est un bug potentiel à traiter. On remplace donc la réflexion par des source generators : <code>JsonSerializerContext</code> pour System.Text.Json, le Request Delegate Generator pour les minimal APIs, <code>CreateSlimBuilder</code>. Côté écosystème, MVC et les controllers ne sont pas supportés, EF Core seulement partiellement, et il faut vérifier chaque bibliothèque. Enfin le build est plus long, produit un binaire par OS et architecture avec une toolchain native (clang/Xcode), et le débit en régime établi peut être un peu inférieur à un JIT tier-1 guidé par Dynamic PGO.</p>`,
+    lesson: 'performance-runtime',
+  },
 ];

@@ -10,6 +10,7 @@ using DevLab.Api.Features.Config;
 using DevLab.Api.Features.Di;
 using DevLab.Api.Features.Greetings;
 using DevLab.Api.Features.Middleware;
+using DevLab.Api.Features.Performance;
 using DevLab.Api.Features.Products;
 using DevLab.Api.Features.Realtime;
 using DevLab.Api.Features.SourceCode;
@@ -45,6 +46,9 @@ builder.Services.AddRealtimeLesson();
 
 // Lesson: Caching + rate limiting
 builder.Services.AddCachingLesson();
+
+// Lesson: Performance & runtime (allocations, GC, tiered JIT, custom Meter for dotnet-counters)
+builder.Services.AddPerformanceLesson();
 
 // Lesson: Authentication (JWT, Cookie, API key, OIDC) + Authorization policies
 builder.Services.AddLabUsers();
@@ -99,6 +103,7 @@ app.MapProductsEndpoints();
 app.MapValidationEndpoints();
 app.MapRealtimeEndpoints();
 app.MapCachingEndpoints();
+app.MapPerformanceEndpoints();
 app.MapConfigEndpoints();
 app.MapJwtEndpoints();
 app.MapCookieEndpoints();

@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <!-- A minimal API compiled ahead-of-time to a single native executable: no JIT, no IL at runtime. -->
+  <PropertyGroup>
+    <!-- `dotnet publish -r osx-arm64` (or linux-x64…) → ILCompiler turns IL into machine code. -->
+    <PublishAot>true</PublishAot>
+    <!-- Also turns on the trim/AOT analyzers during a normal `dotnet build`: incompatible code
+         (reflection over unknown types, Reflection.Emit…) becomes a warning → an error here. -->
+    <IsAotCompatible>true</IsAotCompatible>
+    <!-- No ICU data shipped: culture-invariant behaviour, ~30 MB less on Linux. -->
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <!-- Strip the stack-trace metadata and the reflection-heavy bits we do not use. -->
+    <StackTraceSupport>false</StackTraceSupport>
+    <UseSystemResourceKeys>true</UseSystemResourceKeys>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+</Project>

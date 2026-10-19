@@ -10,7 +10,7 @@ Un **panneau Réseau** (en bas à droite) montre chaque requête HttpClient : m�
 
 ## Interface
 
-- **⌘K / Ctrl+K partout** — palette de commandes qui cherche dans les 26 leçons, les 53 questions d'entretien et
+- **⌘K / Ctrl+K partout** — palette de commandes qui cherche dans les 27 leçons, les 57 questions d'entretien et
   les 51 compétences de la roadmap, avec navigation clavier. L'index des questions (85 kB) n'est chargé qu'à la
   première ouverture, pour ne pas alourdir le premier rendu.
 - **Roadmap en timeline** — les 4 niveaux sur un fil conducteur, anneau de progression SVG par niveau.
@@ -20,16 +20,16 @@ Un **panneau Réseau** (en bas à droite) montre chaque requête HttpClient : m�
 ## Mode carrière
 
 `/roadmap` : le référentiel .NET Junior → Middle → Senior → Architect (51 compétences) confronté à ce que le lab
-enseigne réellement. Trois états honnêtes — **leçon dédiée** (11), **partiel** (17), **à construire** (23) — chaque trou
-décrivant la leçon manquante. Couverture actuelle : **38 %**, forte sur Junior/Middle, mince sur Senior, quasi nulle sur Architect.
+enseigne réellement. Trois états honnêtes — **leçon dédiée** (12), **partiel** (18), **à construire** (21) — chaque trou
+décrivant la leçon manquante. Couverture actuelle : **41 %**, forte sur Junior/Middle, mince sur Senior, quasi nulle sur Architect.
 Les items marqués ☁️ deviennent des démos réelles avec un abonnement Azure.
 
 ## Mode entretien
 
-`/interview` : 53 questions (Angular, .NET, Auth & sécurité, Architecture · Junior → Senior), QCM auto-corrigés et questions ouvertes
+`/interview` : 57 questions (Angular, .NET, Auth & sécurité, Architecture · Junior → Senior), QCM auto-corrigés et questions ouvertes
 avec détection des points-clés dans ta réponse + auto-évaluation, explication, schéma SVG et lien vers la leçon. Score et « à revoir » persistés en localStorage.
 
-## Les 26 leçons
+## Les 27 leçons
 
 | Angular | .NET | Auth full-stack |
 |---|---|---|
@@ -45,6 +45,7 @@ avec détection des points-clés dans ta réponse + auto-évaluation, explicatio
 | | Setup pro : Directory.Build.props, CPM, analyzers, triage | |
 | | Vertical Slice Architecture + Result<T> (module Orders) | |
 | | Modular Monolith : PublicApi, événements, frontières testées | |
+| | Performance & runtime : BenchmarkDotNet, Span/ArrayPool, GC, tiered JIT, dotnet-counters, Native AOT | |
 
 ## Déploiement
 
@@ -107,7 +108,7 @@ ou en une commande : `./dev.sh`.
 ## Tester
 
 ```bash
-cd backend && dotnet test        # 17 tests : intégration (WebApplicationFactory) + architecture (NetArchTest)
+cd backend && dotnet test        # 25 tests : intégration (WebApplicationFactory) + architecture (NetArchTest)
 cd frontend && npm test          # Vitest
 ```
 
@@ -136,6 +137,8 @@ backend/DevLab.Api/
   Features/<Feature>/        un dossier = une leçon (endpoints + services + options)
   Features/Auth/             Jwt/ Cookie/ ApiKey/ Oidc/ Authorization/ + LabAuthentication.cs (5 schemes)
 backend/DevLab.Api.Tests/    xUnit + WebApplicationFactory
+backend/DevLab.Benchmarks/   BenchmarkDotNet (dotnet run -c Release -- --filter '*') + RESULTS.md commité
+backend/DevLab.AotDemo/      minimal API Native AOT (CreateSlimBuilder + JSON source-gen) + RESULTS.md AOT vs JIT
 frontend/src/app/
   lessons/catalog.ts         la liste des leçons et les fichiers qu'elles affichent
   lessons/{angular,dotnet,auth}/  un fichier = une leçon

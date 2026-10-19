@@ -149,6 +149,13 @@ export const LESSONS: Lesson[] = [
     files: [`${BE}/Features/Products/PublicApi/IProductCatalog.cs`, `${BE}/Features/Products/Events/OrderPlacedHandler.cs`, `${BE}/Infrastructure/Events/InProcessEventBus.cs`, `${BE}/Features/Orders/OrdersModule.cs`, `${BE}/Features/Products/ProductsModule.cs`, `${BE}/Infrastructure/Modules/IModule.cs`, 'backend/DevLab.Api.Tests/ModuleBoundariesTests.cs', `${BE}/Program.cs`],
   },
 
+  {
+    id: 'performance-runtime', track: 'dotnet', icon: '🏎️', title: 'Performance & runtime : mesurer, allouer moins, JIT, AOT',
+    summary: 'BenchmarkDotNet, allocations mesurées en direct (Span, ArrayPool), GC et LOH, tiered JIT + OSR observés, dotnet-counters/trace, Native AOT chiffré.',
+    concepts: ['BenchmarkDotNet', '[MemoryDiagnoser]', 'Span<T>', 'ArrayPool', 'GC gen0/1/2 + LOH', 'DATAS', 'Tiered PGO', 'OSR', 'Meter', 'dotnet-counters', 'Native AOT'],
+    files: [`${BE}/Features/Performance/PerformanceLesson.cs`, `${BE}/Features/Performance/AllocationWorkloads.cs`, `${BE}/Features/Performance/TieringDemo.cs`, `${BE}/Features/Performance/PerfMetrics.cs`, 'backend/DevLab.Benchmarks/HotPathBenchmarks.cs', 'backend/DevLab.Benchmarks/RESULTS.md', 'backend/DevLab.AotDemo/Program.cs', 'backend/DevLab.AotDemo/Contracts.cs', 'backend/DevLab.AotDemo/DevLab.AotDemo.csproj', 'backend/DevLab.AotDemo/RESULTS.md', 'backend/DevLab.Api.Tests/PerformanceEndpointsTests.cs'],
+  },
+
   // ─── Auth (full-stack) ──────────────────────────────────────────────────
   {
     id: 'auth-jwt', track: 'auth', icon: '🎟️', title: 'JWT + refresh token',

@@ -14,6 +14,8 @@ public static class SourceCodeEndpoints
         "frontend/proxy.conf.json",
         "backend/DevLab.Api",
         "backend/DevLab.Api.Tests",
+        "backend/DevLab.Benchmarks",
+        "backend/DevLab.AotDemo",
         "backend/Directory.Build.props",
         "backend/Directory.Packages.props",
         "backend/.editorconfig",
@@ -64,6 +66,7 @@ public static class SourceCodeEndpoints
         ".json" => "json",
         ".csproj" or ".props" => "xml",
         ".editorconfig" => "ini",
+        ".md" => "markdown",
         _ => "plaintext",
     };
 }

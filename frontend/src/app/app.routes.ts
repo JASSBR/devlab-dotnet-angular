@@ -50,6 +50,7 @@ export const routes: Routes = [
   { path: 'lessons/vertical-slice', loadComponent: () => import('./lessons/dotnet/vertical-slice').then(m => m.VerticalSliceLesson) },
   { path: 'lessons/modular-monolith', loadComponent: () => import('./lessons/dotnet/modular-monolith').then(m => m.ModularMonolithLesson) },
   { path: 'lessons/testing', loadComponent: () => import('./lessons/dotnet/testing').then(m => m.TestingLesson) },
+  { path: 'lessons/performance-runtime', loadComponent: () => import('./lessons/dotnet/performance-runtime').then(m => m.PerformanceRuntimeLesson), title: 'Performance & runtime' },
 
   // ── Auth ─────────────────────────────────────────────────────────────────
   { path: 'lessons/auth-jwt', loadComponent: () => import('./lessons/auth/jwt').then(m => m.JwtLesson) },
