@@ -682,4 +682,55 @@ export const QUESTIONS: Question[] = [
     ],
     model: `<p>Le cœur : ne jamais envoyer une notification dans la requête HTTP qui la déclenche. Les modules métier publient un message (« commande confirmée ») dans une file ; un service de notifications le consomme, résout les préférences de l’utilisateur (canaux, opt-out, langue), rend un template, et appelle le fournisseur (SendGrid, Twilio, FCM) via un adaptateur par canal. Chaque envoi porte une clé d’idempotence — un retry ne doit jamais doubler un SMS. Les échecs partent en retry avec backoff, puis en dead-letter queue pour analyse. Les fournisseurs ont des quotas : un rate limiter par fournisseur. Et chaque notification a un statut persisté (queued, sent, failed, delivered via webhook) corrélé par traceId, avec des métriques d’échec qui alertent.</p>`,
   },
+  // ── async-concurrency ──
+  {
+    id: 'net-whenall', topic: 'dotnet', level: 2, type: 'mcq',
+    question: 'Un handler fait « var a = await GetUserAsync(); var b = await GetOrdersAsync(); » — deux appels HTTP indépendants de 300 ms et 500 ms. Quelle affirmation est juste ?',
+    choices: [
+      'Les deux appels partent en parallèle : await ne bloque rien, la requête dure ≈ 500 ms.',
+      'La requête dure ≈ 800 ms ; démarrer les deux tâches puis « await Task.WhenAll(ta, tb) » la ramène à ≈ 500 ms, sans thread supplémentaire.',
+      'Il faut Task.Run autour de chaque appel pour les paralléliser.',
+      'Task.WhenAll crée un thread par tâche : à éviter dans une API.',
+    ],
+    answer: 1,
+    explanation: `<p><code>await</code> ne bloque pas le <em>thread</em>, mais il suspend la <em>méthode</em> : le 2ᵉ appel ne démarre qu’après le 1ᵉʳ → somme des latences. Une tâche démarre dès qu’on appelle la méthode ; <code>Task.WhenAll</code> attend simplement qu’elles soient toutes finies → max des latences. Aucun thread n’est occupé pendant l’I/O, donc pas de <code>Task.Run</code> (réservé au travail CPU). Limite : un même <code>DbContext</code> refuse deux requêtes concurrentes.</p>`,
+    lesson: 'async-concurrency',
+  },
+  {
+    id: 'net-threadpool-starvation', topic: 'dotnet', level: 3, type: 'open',
+    question: 'Sous charge, la latence p99 de ton API passe de 50 ms à 8 s alors que le CPU reste à 20 %. Tu suspectes une thread pool starvation : explique le mécanisme, comment tu le confirmes et comment tu corriges.',
+    keyPoints: [
+      { text: 'Cause : du code bloquant sur des threads du pool (.Result, .Wait(), Thread.Sleep, sync-over-async, I/O synchrone)', keywords: ['.result', '.wait', 'thread.sleep', 'sync-over-async', 'sync over async', 'bloquant', 'bloque'] },
+      { text: 'Mécanisme : au-delà de MinThreads le pool n’injecte que lentement de nouveaux threads ; le travail attend dans la file', keywords: ['minthreads', 'inject', 'file d', 'queue', 'hill climbing'] },
+      { text: 'Diagnostic : dotnet-counters (threadpool-queue-length, thread count qui grimpe), dotnet-stack / dump pour voir les piles bloquées', keywords: ['dotnet-counters', 'queue-length', 'dotnet-stack', 'dotnet-dump', 'dump', 'compteur'] },
+      { text: 'Correction : async de bout en bout et CancellationToken propagé ; SetMinThreads n’est qu’un pansement', keywords: ['bout en bout', 'async partout', 'tout async', 'setminthreads', 'pansement'] },
+    ],
+    model: `<p>Une requête ASP.NET Core s’exécute sur un thread du pool. Si le code <strong>bloque</strong> ce thread — <code>.Result</code>, <code>.Wait()</code>, <code>Thread.Sleep</code>, un client HTTP ou une base appelés en synchrone, bref du sync-over-async — le thread ne sert plus à rien pendant l’attente. Tant qu’on reste sous <code>MinThreads</code>, le pool crée des threads à la demande ; au-delà, il n’en injecte que quelques-uns par seconde (hill climbing). Le travail s’empile dans la file : les requêtes attendent un thread, la latence explose, et le CPU reste bas puisque tout le monde dort. Pour le confirmer : <code>dotnet-counters monitor</code> montre <code>threadpool-queue-length</code> qui monte et un thread count qui grimpe par paliers ; un <code>dotnet-stack</code> ou un dump montre des dizaines de piles arrêtées sur <code>Task.Wait</code>. La correction est d’être async de bout en bout (et de propager le <code>CancellationToken</code>) ; augmenter <code>SetMinThreads</code> n’est qu’un pansement qui repousse le problème.</p>`,
+    lesson: 'async-concurrency',
+  },
+  {
+    id: 'net-valuetask', topic: 'dotnet', level: 3, type: 'mcq',
+    question: 'Une méthode GetPriceAsync retourne une ValueTask<decimal> (le prix est en cache 99 % du temps). Quel usage est INCORRECT ?',
+    choices: [
+      '« var price = await cache.GetPriceAsync(id); »',
+      '« var vt = cache.GetPriceAsync(id); if (vt.IsCompletedSuccessfully) use(vt.Result); else use(await vt); »',
+      '« var vt = cache.GetPriceAsync(id); var a = await vt; var b = await vt; »',
+      '« var t = cache.GetPriceAsync(id).AsTask(); await Task.WhenAll(t, other); »',
+    ],
+    answer: 2,
+    explanation: `<p>Une <code>ValueTask</code> ne s’attend <strong>qu’une seule fois</strong> : elle peut être adossée à un <code>IValueTaskSource</code> recyclé, et un 2ᵉ <code>await</code> lirait l’état d’une autre opération. Lire <code>.Result</code> est permis une fois la tâche terminée ; pour la combiner ou l’attendre plusieurs fois, on la convertit avec <code>.AsTask()</code>. Son intérêt : zéro allocation quand le résultat est déjà disponible — à réserver aux hot paths mesurés.</p>`,
+    lesson: 'async-concurrency',
+  },
+  {
+    id: 'net-singleton-race', topic: 'dotnet', level: 2, type: 'open',
+    question: 'Un service Singleton fait « _count++ » à chaque commande, puis appelle une API partenaire limitée à 5 appels simultanés. Quels problèmes vois-tu et comment les corriges-tu ?',
+    keyPoints: [
+      { text: 'Singleton partagé par toutes les requêtes concurrentes → état mutable non thread-safe', keywords: ['singleton', 'partagé', 'partage', 'thread-safe', 'thread safe', 'concurren'] },
+      { text: '_count++ = lire / ajouter / écrire : race condition, incréments perdus', keywords: ['race', 'perdu', 'lost', 'lire', 'atomique'] },
+      { text: 'Interlocked.Increment (ou lock sur un System.Threading.Lock pour plusieurs instructions)', keywords: ['interlocked', 'lock'] },
+      { text: 'SemaphoreSlim(5) : await WaitAsync() puis Release() dans un finally ; pas de lock autour d’un await', keywords: ['semaphoreslim', 'semaphore', 'waitasync', 'finally', 'release'] },
+    ],
+    model: `<p>Un Singleton est partagé par toutes les requêtes qui tournent en parallèle : son état mutable doit être thread-safe. <code>_count++</code> n’est pas atomique — c’est lire, ajouter, écrire — donc deux requêtes peuvent lire la même valeur et un incrément est perdu (race condition, invisible en dev, fréquente en charge). Correction : <code>Interlocked.Increment(ref _count)</code>, ou un <code>lock</code> sur un <code>System.Threading.Lock</code> si la section critique fait plusieurs instructions. Pour l’API partenaire, un <code>lock</code> ne marche pas (pas d’<code>await</code> dans un lock) : un <code>SemaphoreSlim(5, 5)</code> avec <code>await WaitAsync(ct)</code> avant l’appel et <code>Release()</code> dans un <code>finally</code>, sinon une exception fait fuir un slot pour toujours.</p>`,
+    lesson: 'async-concurrency',
+  },
 ];

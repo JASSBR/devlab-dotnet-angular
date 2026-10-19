@@ -100,8 +100,8 @@ import { Progress } from '../shared/progress';
 export class Home {
   readonly progress = inject(Progress);
   readonly stats = [
-    { value: 26, label: 'leçons' },
-    { value: 53, label: 'questions d’entretien' },
+    { value: 27, label: 'leçons' },
+    { value: 57, label: 'questions d’entretien' },
     { value: 51, label: 'compétences cartographiées' },
     { value: 17, label: 'tests backend' },
     { value: '⌘K', label: 'pour tout trouver' },

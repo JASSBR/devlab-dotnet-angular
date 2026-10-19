@@ -45,6 +45,7 @@ export const routes: Routes = [
   { path: 'lessons/validation', loadComponent: () => import('./lessons/dotnet/validation').then(m => m.ValidationLesson) },
   { path: 'lessons/realtime', loadComponent: () => import('./lessons/dotnet/realtime').then(m => m.RealtimeLesson) },
   { path: 'lessons/caching', loadComponent: () => import('./lessons/dotnet/caching').then(m => m.CachingLesson) },
+  { path: 'lessons/async-concurrency', loadComponent: () => import('./lessons/dotnet/async-concurrency').then(m => m.AsyncConcurrencyLesson) },
   { path: 'lessons/options', loadComponent: () => import('./lessons/dotnet/options').then(m => m.OptionsLesson) },
   { path: 'lessons/project-setup', loadComponent: () => import('./lessons/dotnet/project-setup').then(m => m.ProjectSetupLesson) },
   { path: 'lessons/vertical-slice', loadComponent: () => import('./lessons/dotnet/vertical-slice').then(m => m.VerticalSliceLesson) },
