@@ -17,7 +17,8 @@ import { Progress } from '../shared/progress';
         Le panneau <strong>Réseau</strong> en bas à droite te montre chaque requête, header et statut.
       </p>
       <div class="row">
-        <a routerLink="/roadmap" class="btn primary">🧭 Suivre le parcours</a>
+        <a routerLink="/parcours" class="btn primary">🪜 Suivre le parcours .NET</a>
+        <a routerLink="/roadmap" class="btn">🧭 Mode carrière</a>
         <a routerLink="/interview" class="btn">🎤 Me faire interroger</a>
         <a routerLink="/lessons/signals-state" class="btn">Commencer par Angular ⚡</a>
         <a routerLink="/lessons/auth-jwt" class="btn">Aller direct à l'auth 🎟️</a>

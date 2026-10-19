@@ -19,6 +19,9 @@
     </div>
 
     <nav>
+      <a routerLink="/parcours" routerLinkActive="active" class="interview-link" (click)="sidebarOpen.set(false)">
+        <span class="icon">🪜</span><span class="label">Parcours .NET</span>
+      </a>
       <a routerLink="/roadmap" routerLinkActive="active" class="interview-link" (click)="sidebarOpen.set(false)">
         <span class="icon">🧭</span><span class="label">Mode carrière</span>
       </a>

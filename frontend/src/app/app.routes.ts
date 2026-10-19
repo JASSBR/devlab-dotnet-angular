@@ -59,6 +59,7 @@ export const routes: Routes = [
   { path: 'lessons/auth-oidc/callback', loadComponent: () => import('./lessons/auth/oidc').then(m => m.OidcCallback) },
   { path: 'lessons/authorization', loadComponent: () => import('./lessons/auth/authorization').then(m => m.AuthorizationLesson) },
 
+  { path: 'parcours', loadComponent: () => import('./roadmap/maturity').then(m => m.Maturity), title: 'Parcours .NET' },
   { path: 'roadmap', loadComponent: () => import('./roadmap/roadmap').then(m => m.Roadmap), title: 'Mode carrière' },
   { path: 'interview', loadComponent: () => import('./interview/interview').then(m => m.Interview), title: 'Entretien' },
 

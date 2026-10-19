@@ -108,6 +108,7 @@ export class CommandPalette {
       kind: 'lesson', label: l.title, icon: l.icon, route: ['/lessons', l.id],
       hint: `${TRACKS[l.track].label} · ${l.summary}`, keywords: l.concepts.join(' ') + ' ' + l.id,
     })),
+    { kind: 'page', label: 'Parcours .NET', icon: '🪜', route: ['/parcours'], hint: 'The .NET Maturity Stack : 7 niveaux, chaque notion → sa leçon', keywords: 'maturity stack parcours niveaux progression' },
     { kind: 'page', label: 'Mode carrière', icon: '🧭', route: ['/roadmap'], hint: 'Le référentiel .NET et ce que le lab couvre', keywords: 'roadmap junior middle senior architect' },
     { kind: 'page', label: 'Mode entretien', icon: '🎤', route: ['/interview'], hint: '53 questions, QCM et ouvertes', keywords: 'interview quiz questions' },
     { kind: 'page', label: 'Accueil', icon: '🏠', route: ['/'], hint: 'Vue d’ensemble du lab', keywords: 'home accueil' },
