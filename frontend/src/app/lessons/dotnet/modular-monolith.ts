@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { AuthStore } from '../../core/auth/auth.store';
 import { DiagramModules } from '../../shared/diagrams';
+import { RouterLink } from '@angular/router';
 import { LessonShell } from '../../shared/lesson-shell';
 import { lessonById } from '../catalog';
 import { Product } from '../angular/cart.store';
@@ -11,7 +12,7 @@ interface Step { label: string; detail: string; ok: boolean; }
 
 @Component({
   selector: 'lesson-modular-monolith',
-  imports: [LessonShell, DiagramModules],
+  imports: [LessonShell, DiagramModules, RouterLink],
   template: `
     <lesson-shell [lesson]="lesson">
       <div explain>
@@ -21,11 +22,11 @@ interface Step { label: string; detail: string; ok: boolean; }
         Il expose un <strong>PublicApi</strong> minuscule : une interface (<code>IProductCatalog</code>) et des événements (<code>OrderPlaced</code>). Tout le reste est <code>internal</code>.</p>
         <ol class="steps">
           <li><strong>Appel synchrone via interface</strong> : Orders a besoin du prix et du stock → <code>IProductCatalog.FindAsync</code>. Il ne voit jamais l'entité <code>Product</code> ni <code>AppDbContext</code>.</li>
-          <li><strong>Réaction asynchrone via événement</strong> : Orders publie <code>OrderPlaced</code> <em>après</em> avoir persisté. Products écoute et décrémente le stock. Orders ignore que Products écoute. Demain, un module Shipping s'abonne sans toucher Orders.</li>
+          <li><strong>Réaction asynchrone via événement</strong> : Orders écrit <code>OrderPlaced</code> dans son <strong>outbox</strong>, dans la même transaction que la commande ; un dispatcher le publie ensuite. Products écoute et décrémente le stock. Orders ignore que Products écoute. Demain, un module Shipping s'abonne sans toucher Orders.</li>
           <li><strong>Frontière testée</strong> : <code>ModuleBoundariesTests</code> (NetArchTest) échoue si un type de Orders référence un type interne de Products. Dans une solution multi-projets, c'est le compilateur qui le fait ; ici c'est un test.</li>
         </ol>
         <div class="callout">Pourquoi pas des microservices tout de suite ? Parce que 90 % des projets n'en ont pas besoin, et que le coût (réseau, cohérence, observabilité, déploiement) est énorme. Le monolithe modulaire donne les <em>frontières</em> sans le <em>réseau</em>. Le jour où un module doit scaler seul, on le sort : ses seules dépendances sont déjà des interfaces et des événements.</div>
-        <p class="small muted">Limite honnête : l'<code>InProcessEventBus</code> appelle les handlers dans la même requête, sans transaction commune ni retry. En production : <strong>outbox pattern</strong> (l'événement est écrit en base avec la commande, puis dispatché par un job) — c'est la question d'entretien classique qui suit.</p>
+        <p class="small muted">Conséquence : la cohérence entre modules est <strong>éventuelle</strong> — le stock bouge quelques centaines de ms après la réponse, et l'événement peut être livré plus d'une fois (retries). Le détail (dual write, retries, inbox) est dans la leçon <a routerLink="/lessons/idempotency-outbox">Idempotence &amp; Outbox</a>.</p>
       </div>
 
       <div demo class="col">
@@ -39,7 +40,7 @@ interface Step { label: string; detail: string; ok: boolean; }
             <li class="fade-in"><strong>{{ s.label }}</strong> <span class="badge" [class.ok]="s.ok" [class.err]="!s.ok">{{ s.ok ? '✓' : '✗' }}</span><br><span class="muted small mono">{{ s.detail }}</span></li>
           }
         </ol>
-        <p class="small muted">Regarde aussi les logs du backend : <code>Event OrderPlaced → 1 handler(s)</code> puis <code>stock of product 2 decremented</code>.</p>
+        <p class="small muted">Regarde aussi les logs du backend : <code>Event OrderPlaced → 1 handler(s)</code> (publié par l'<code>OutboxDispatcher</code>, pas par la requête) puis <code>stock of product 2 decremented</code>.</p>
       </div>
     </lesson-shell>
   `,
@@ -64,22 +65,32 @@ export class ModularMonolithLesson {
       push({ label: 'Products.PublicApi → IProductCatalog.FindAsync(2)', detail: `${before.name}, prix ${before.price}, stock ${before.stock}`, ok: true });
 
       const order = await new Promise<OrderDto>((res, rej) => this.http.post<OrderDto>('/api/orders', { productId: 2, quantity: 1 }).subscribe({ next: res, error: rej }));
-      push({ label: 'Orders : PlaceOrderHandler → SaveChanges (orders.db)', detail: `commande #${order.id}, total ${order.total} €, statut ${order.status}`, ok: true });
-      push({ label: 'Orders publie OrderPlaced(orderId, productId, qty)', detail: 'InProcessEventBus → handlers résolus dans le scope courant', ok: true });
+      push({ label: 'Orders : PlaceOrderHandler → commande + OutboxMessage, une transaction (orders.db)', detail: `commande #${order.id}, total ${order.total} €, statut ${order.status}`, ok: true });
+      push({ label: 'OutboxDispatcher publie OrderPlaced(orderId, productId, qty)', detail: 'BackgroundService, toutes les 500 ms → InProcessEventBus → handlers', ok: true });
 
-      const after = await this.get<Product>('/api/products/2');
+      const after = await this.waitForStock(before.stock - 1);
       const decremented = after.stock === before.stock - 1;
-      push({ label: 'Products.OrderPlacedHandler → ExecuteUpdate stock − 1 (devlab.db)', detail: `stock ${before.stock} → ${after.stock}`, ok: decremented });
+      push({ label: 'Products.OrderPlacedHandler → ExecuteUpdate stock − 1 + inbox (devlab.db)', detail: `stock ${before.stock} → ${after.stock} (cohérence éventuelle)`, ok: decremented });
       this.stock.set(after.stock);
 
       const cancelled = await new Promise<OrderDto>((res, rej) => this.http.post<OrderDto>(`/api/orders/${order.id}/cancel`, null).subscribe({ next: res, error: rej }));
-      const restored = await this.get<Product>('/api/products/2');
+      const restored = await this.waitForStock(before.stock);
       push({ label: 'Annulation → OrderCancelled → Products restocke', detail: `commande #${cancelled.id} ${cancelled.status}, stock ${after.stock} → ${restored.stock}`, ok: restored.stock === before.stock });
       this.stock.set(restored.stock);
     } catch (e: unknown) {
       const err = e as { status?: number; error?: { title?: string } };
       push({ label: 'Échec', detail: `${err.status} ${err.error?.title ?? ''}`, ok: false });
     } finally { this.running.set(false); }
+  }
+
+  /** The stock moves asynchronously (outbox): poll for a few seconds instead of reading once. */
+  private async waitForStock(expected: number) {
+    let product = await this.get<Product>('/api/products/2');
+    for (let i = 0; i < 20 && product.stock !== expected; i++) {
+      await new Promise(r => setTimeout(r, 250));
+      product = await this.get<Product>('/api/products/2');
+    }
+    return product;
   }
 
   private get<T>(url: string) { return new Promise<T>((res, rej) => this.http.get<T>(url).subscribe({ next: res, error: rej })); }

@@ -10,7 +10,7 @@ Un **panneau Réseau** (en bas à droite) montre chaque requête HttpClient : m�
 
 ## Interface
 
-- **⌘K / Ctrl+K partout** — palette de commandes qui cherche dans les 26 leçons, les 53 questions d'entretien et
+- **⌘K / Ctrl+K partout** — palette de commandes qui cherche dans les 28 leçons, les 58 questions d'entretien et
   les 51 compétences de la roadmap, avec navigation clavier. L'index des questions (85 kB) n'est chargé qu'à la
   première ouverture, pour ne pas alourdir le premier rendu.
 - **Roadmap en timeline** — les 4 niveaux sur un fil conducteur, anneau de progression SVG par niveau.
@@ -20,16 +20,16 @@ Un **panneau Réseau** (en bas à droite) montre chaque requête HttpClient : m�
 ## Mode carrière
 
 `/roadmap` : le référentiel .NET Junior → Middle → Senior → Architect (51 compétences) confronté à ce que le lab
-enseigne réellement. Trois états honnêtes — **leçon dédiée** (11), **partiel** (17), **à construire** (23) — chaque trou
-décrivant la leçon manquante. Couverture actuelle : **38 %**, forte sur Junior/Middle, mince sur Senior, quasi nulle sur Architect.
+enseigne réellement. Trois états honnêtes — **leçon dédiée** (11), **partiel** (21), **à construire** (19) — chaque trou
+décrivant la leçon manquante. Couverture actuelle : **42 %**, forte sur Junior/Middle, mince sur Senior, quasi nulle sur Architect.
 Les items marqués ☁️ deviennent des démos réelles avec un abonnement Azure.
 
 ## Mode entretien
 
-`/interview` : 53 questions (Angular, .NET, Auth & sécurité, Architecture · Junior → Senior), QCM auto-corrigés et questions ouvertes
+`/interview` : 58 questions (Angular, .NET, Auth & sécurité, Architecture · Junior → Senior), QCM auto-corrigés et questions ouvertes
 avec détection des points-clés dans ta réponse + auto-évaluation, explication, schéma SVG et lien vers la leçon. Score et « à revoir » persistés en localStorage.
 
-## Les 26 leçons
+## Les 28 leçons
 
 | Angular | .NET | Auth full-stack |
 |---|---|---|
@@ -45,6 +45,8 @@ avec détection des points-clés dans ta réponse + auto-évaluation, explicatio
 | | Setup pro : Directory.Build.props, CPM, analyzers, triage | |
 | | Vertical Slice Architecture + Result<T> (module Orders) | |
 | | Modular Monolith : PublicApi, événements, frontières testées | |
+| | Migrations EF Core : snapshot, historique, bundle, expand/contract | |
+| | Idempotence (Idempotency-Key) & outbox transactionnelle + inbox | |
 
 ## Déploiement
 
@@ -104,10 +106,18 @@ cd frontend && npm start
 
 ou en une commande : `./dev.sh`.
 
+Le schéma SQLite vient de **migrations EF Core**, appliquées au démarrage (`MigrateAsync`, acceptable pour un lab
+mono-instance — voir la leçon *Migrations EF Core*). Pour en créer une :
+
+```bash
+dotnet tool restore              # dotnet-ef épinglé dans dotnet-tools.json (même version qu'EF Core)
+dotnet ef migrations add <Nom> --project backend/DevLab.Api --context OrdersDbContext --output-dir Features/Orders/Migrations
+```
+
 ## Tester
 
 ```bash
-cd backend && dotnet test        # 17 tests : intégration (WebApplicationFactory) + architecture (NetArchTest)
+cd backend && dotnet test        # 30 tests : intégration (WebApplicationFactory) + architecture (NetArchTest)
 cd frontend && npm test          # Vitest
 ```
 
@@ -130,7 +140,9 @@ backend/
   .editorconfig              style + triage des analyzers (chaque exception est justifiée)
 backend/DevLab.Api/
   Program.cs                 composition root : chaque feature s'enregistre via une extension method
-  Infrastructure/            Result<T>, IModule/IApiEndpoint (scan), InProcessEventBus
+  Infrastructure/            Result<T>, IModule/IApiEndpoint (scan), InProcessEventBus,
+                             Messaging/ (outbox, dispatcher, inbox), Idempotency/ (IdempotencyFilter)
+  Features/*/Migrations/     migrations EF Core de chaque module (générées, exclues des analyzers)
   Features/Orders/           module en vertical slices (PlaceOrder/, GetOrders/, CancelOrder/, PublicApi/, Shared/)
   Features/Products/PublicApi/  le seul contrat que les autres modules voient (IProductCatalog)
   Features/<Feature>/        un dossier = une leçon (endpoints + services + options)

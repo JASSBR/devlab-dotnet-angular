@@ -34,7 +34,7 @@ for (const m of catalog.matchAll(/[`']([^`'$]*\$\{(FE|BE)\}[^`']*|(?:frontend|ba
 const languageFor = p => {
   if (p.endsWith('.editorconfig')) return 'ini';
   return { '.cs': 'csharp', '.ts': 'typescript', '.html': 'xml', '.scss': 'scss', '.css': 'scss',
-           '.json': 'json', '.csproj': 'xml', '.props': 'xml' }[extname(p)] ?? 'plaintext';
+           '.json': 'json', '.csproj': 'xml', '.props': 'xml', '.sql': 'sql' }[extname(p)] ?? 'plaintext';
 };
 
 const snapshot = {};

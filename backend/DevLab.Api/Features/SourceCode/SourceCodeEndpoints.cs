@@ -64,6 +64,7 @@ public static class SourceCodeEndpoints
         ".json" => "json",
         ".csproj" or ".props" => "xml",
         ".editorconfig" => "ini",
+        ".sql" => "sql",
         _ => "plaintext",
     };
 }

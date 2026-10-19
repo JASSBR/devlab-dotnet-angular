@@ -148,6 +148,18 @@ export const LESSONS: Lesson[] = [
     concepts: ['IModule', 'PublicApi', 'IDomainEvent', 'IEventBus', 'outbox', 'NetArchTest'],
     files: [`${BE}/Features/Products/PublicApi/IProductCatalog.cs`, `${BE}/Features/Products/Events/OrderPlacedHandler.cs`, `${BE}/Infrastructure/Events/InProcessEventBus.cs`, `${BE}/Features/Orders/OrdersModule.cs`, `${BE}/Features/Products/ProductsModule.cs`, `${BE}/Infrastructure/Modules/IModule.cs`, 'backend/DevLab.Api.Tests/ModuleBoundariesTests.cs', `${BE}/Program.cs`],
   },
+  {
+    id: 'ef-migrations', track: 'dotnet', icon: '🧬', title: 'Migrations EF Core',
+    summary: 'Fini EnsureCreated : deux migrations par module, snapshot du modèle, __EFMigrationsHistory, et comment on les applique vraiment en production.',
+    concepts: ['migrations add', 'Up/Down', 'ModelSnapshot', '__EFMigrationsHistory', 'migrations bundle', 'expand/contract'],
+    files: [`${BE}/Features/Orders/Migrations/20261019092939_AddIdempotencyAndOutbox.cs`, `${BE}/Features/Orders/Migrations/OrdersDbContextModelSnapshot.cs`, `${BE}/Features/Orders/Migrations/Scripts/orders.migrations.sql`, `${BE}/Infrastructure/DbSeeder.cs`, `${BE}/Features/EfMigrations/MigrationsLesson.cs`, 'backend/DevLab.Api.Tests/MigrationsTests.cs', 'backend/.editorconfig', `${FE}/lessons/dotnet/ef-migrations.ts`],
+  },
+  {
+    id: 'idempotency-outbox', track: 'dotnet', icon: '📮', title: 'Idempotence & Outbox',
+    summary: 'Idempotency-Key sur PlaceOrder (rejeu, 422, doublons concurrents), outbox transactionnelle, dispatcher avec retries, consommateur idempotent (inbox).',
+    concepts: ['Idempotency-Key', 'IEndpointFilter', 'dual write', 'outbox', 'at-least-once', 'inbox', 'poison message'],
+    files: [`${BE}/Infrastructure/Idempotency/IdempotencyFilter.cs`, `${BE}/Features/Orders/PlaceOrder/PlaceOrder.Handler.cs`, `${BE}/Infrastructure/Messaging/OutboxDispatcher.cs`, `${BE}/Infrastructure/Messaging/OutboxMessage.cs`, `${BE}/Infrastructure/Messaging/MessageContext.cs`, `${BE}/Features/Products/Events/OrderPlacedHandler.cs`, `${BE}/Infrastructure/Persistence/TransactionExtensions.cs`, `${BE}/Features/Orders/Outbox/OutboxEndpoints.cs`, 'backend/DevLab.Api.Tests/IdempotencyTests.cs', 'backend/DevLab.Api.Tests/OutboxTests.cs', `${FE}/lessons/dotnet/idempotency-outbox.ts`],
+  },
 
   // ─── Auth (full-stack) ──────────────────────────────────────────────────
   {

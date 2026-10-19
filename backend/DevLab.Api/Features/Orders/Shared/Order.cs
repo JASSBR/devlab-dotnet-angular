@@ -1,3 +1,5 @@
+using DevLab.Api.Infrastructure.Idempotency;
+using DevLab.Api.Infrastructure.Messaging;
 using Microsoft.EntityFrameworkCore;
 
 namespace DevLab.Api.Features.Orders.Shared;
@@ -17,10 +19,15 @@ public sealed class Order
     public DateTime PlacedAt { get; set; } = DateTime.UtcNow;
 }
 
-/// <summary>Orders owns its data: its own DbContext, its own SQLite file. No shared tables between modules.</summary>
+/// <summary>
+/// Orders owns its data: its own DbContext, its own SQLite file. No shared tables between modules.
+/// Its outbox and idempotency records live here too, so they commit in the same transaction as the orders.
+/// </summary>
 public sealed class OrdersDbContext(DbContextOptions<OrdersDbContext> options) : DbContext(options)
 {
     public DbSet<Order> Orders => Set<Order>();
+    public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
+    public DbSet<IdempotencyRecord> IdempotencyRecords => Set<IdempotencyRecord>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -32,6 +39,8 @@ public sealed class OrdersDbContext(DbContextOptions<OrdersDbContext> options) :
             e.Property(o => o.Status).HasConversion<string>();
             e.HasIndex(o => o.CustomerName);
         });
+        modelBuilder.AddOutbox();
+        modelBuilder.AddIdempotencyRecords();
     }
 }
 

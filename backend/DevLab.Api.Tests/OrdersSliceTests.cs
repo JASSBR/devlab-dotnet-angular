@@ -1,7 +1,5 @@
 using System.Net;
-using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using DevLab.Api.Features.Auth.Jwt;
 using DevLab.Api.Features.Orders.PlaceOrder;
 using DevLab.Api.Features.Orders.Shared;
 using DevLab.Api.Features.Products;
@@ -18,12 +16,13 @@ public class OrdersSliceTests(LabApiFactory factory) : IClassFixture<LabApiFacto
         var before = (await client.GetFromJsonAsync<ProductDto>("/api/products/1"))!;
         var response = await client.PostAsJsonAsync("/api/orders", new PlaceOrderRequest(1, 2));
         var order = await response.Content.ReadFromJsonAsync<OrderDto>();
+        await factory.FlushOutboxAsync();   // the event travels through the outbox, asynchronously
         var after = (await client.GetFromJsonAsync<ProductDto>("/api/products/1"))!;
 
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         Assert.Equal("bob", order!.CustomerName);
         Assert.Equal(before.Price * 2, order.Total);
-        Assert.Equal(before.Stock - 2, after.Stock);     // OrderPlaced → Products.OrderPlacedHandler
+        Assert.Equal(before.Stock - 2, after.Stock);     // outbox → OrderPlaced → Products.OrderPlacedHandler
     }
 
     [Fact]
@@ -67,12 +66,5 @@ public class OrdersSliceTests(LabApiFactory factory) : IClassFixture<LabApiFacto
         Assert.Equal(HttpStatusCode.Conflict, again.StatusCode);   // orders.already_cancelled
     }
 
-    private async Task<HttpClient> LoggedInAsync(string user, string password)
-    {
-        var client = factory.CreateClient();
-        var login = await client.PostAsJsonAsync("/api/auth/jwt/login", new LoginRequest(user, password));
-        var pair = await login.Content.ReadFromJsonAsync<TokenPair>();
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", pair!.AccessToken);
-        return client;
-    }
+    private Task<HttpClient> LoggedInAsync(string user, string password) => factory.LoggedInAsync(user, password);
 }

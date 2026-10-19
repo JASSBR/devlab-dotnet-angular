@@ -1,3 +1,5 @@
+using System.Reflection;
+
 namespace DevLab.Api.Infrastructure.Events;
 
 /// <summary>Something that happened, in the past tense, owned by the module that raised it.</summary>
@@ -11,15 +13,21 @@ public interface IEventHandler<in TEvent> where TEvent : IDomainEvent
 public interface IEventBus
 {
     Task PublishAsync<TEvent>(TEvent @event, CancellationToken ct) where TEvent : IDomainEvent;
+
+    /// <summary>Same, when the type is only known at runtime (an event deserialized from the outbox).</summary>
+    Task PublishAsync(IDomainEvent @event, CancellationToken ct);
 }
 
 /// <summary>
 /// Modules never call each other's handlers: they publish an event and whoever is
-/// interested subscribes. Same process, same transaction boundary is NOT guaranteed —
-/// in production you'd persist the event first (outbox pattern) and dispatch it asynchronously.
+/// interested subscribes. Nobody calls this bus from a request anymore: events are written
+/// to the outbox with the business change, and the OutboxDispatcher publishes them here.
 /// </summary>
 public sealed class InProcessEventBus(IServiceProvider services, ILogger<InProcessEventBus> logger) : IEventBus
 {
+    private static readonly MethodInfo GenericPublish = typeof(InProcessEventBus)
+        .GetMethods().Single(m => m is { Name: nameof(PublishAsync), IsGenericMethodDefinition: true });
+
     public async Task PublishAsync<TEvent>(TEvent @event, CancellationToken ct) where TEvent : IDomainEvent
     {
         // Resolved from the CURRENT scope → handlers can use scoped services (DbContext).
@@ -29,4 +37,7 @@ public sealed class InProcessEventBus(IServiceProvider services, ILogger<InProce
         foreach (var handler in handlers)
             await handler.HandleAsync(@event, ct);
     }
+
+    public Task PublishAsync(IDomainEvent @event, CancellationToken ct) =>
+        (Task)GenericPublish.MakeGenericMethod(@event.GetType()).Invoke(this, [@event, ct])!;
 }
