@@ -131,6 +131,12 @@ export const LESSONS: Lesson[] = [
     files: [`${BE}/Features/Caching/CachingLesson.cs`, `${FE}/lessons/dotnet/caching.ts`],
   },
   {
+    id: 'async-concurrency', track: 'dotnet', icon: '⏱️', title: 'Async & concurrence',
+    summary: 'WhenAll vs séquentiel, SemaphoreSlim, Channels, streaming IAsyncEnumerable, annulation, ValueTask, race conditions et thread pool starvation — tout mesuré en direct.',
+    concepts: ['Task.WhenAll', 'Task.WhenAny', 'SemaphoreSlim', 'Channel<T>', 'IAsyncEnumerable', 'CancellationToken', 'ValueTask', 'Interlocked', 'Lock', 'ThreadPool'],
+    files: [`${BE}/Features/AsyncConcurrency/AsyncConcurrencyLesson.cs`, `${BE}/Features/AsyncConcurrency/ConcurrencyDemos.cs`, `${BE}/Features/AsyncConcurrency/ThreadPoolDemo.cs`, `${FE}/lessons/dotnet/async-concurrency.ts`, 'backend/DevLab.Api.Tests/AsyncConcurrencyTests.cs'],
+  },
+  {
     id: 'options', track: 'dotnet', icon: '⚙️', title: 'Configuration & Options pattern',
     summary: 'appsettings en couches, IOptions vs IOptionsSnapshot vs IOptionsMonitor, validation au démarrage.',
     concepts: ['IConfiguration', 'Bind', 'IOptionsSnapshot', 'IOptionsMonitor', 'ValidateOnStart', 'user-secrets'],

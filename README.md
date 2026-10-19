@@ -47,6 +47,7 @@ avec détection des points-clés dans ta réponse + auto-évaluation, explicatio
 | | Modular Monolith : PublicApi, événements, frontières testées | |
 | | C# pour qui vient de TypeScript (patterns, struct vs class, records, génériques) | |
 | | Collections & LINQ (HashSet benchmark, deferred execution tracée) | |
+| | Async & concurrence : WhenAll, SemaphoreSlim, Channels, IAsyncEnumerable, annulation, ThreadPool | |
 
 ## Déploiement
 

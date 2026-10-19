@@ -1,3 +1,4 @@
+using DevLab.Api.Features.AsyncConcurrency;
 using DevLab.Api.Features.Auth;
 using DevLab.Api.Features.Auth.ApiKey;
 using DevLab.Api.Features.Auth.Authorization;
@@ -47,6 +48,9 @@ builder.Services.AddRealtimeLesson();
 
 // Lesson: Caching + rate limiting
 builder.Services.AddCachingLesson();
+
+// Lesson: Async & concurrency (WhenAll, SemaphoreSlim, Channels, IAsyncEnumerable, ThreadPool)
+builder.Services.AddAsyncConcurrencyLesson();
 
 // Lesson: Authentication (JWT, Cookie, API key, OIDC) + Authorization policies
 builder.Services.AddLabUsers();
@@ -101,6 +105,7 @@ app.MapProductsEndpoints();
 app.MapValidationEndpoints();
 app.MapRealtimeEndpoints();
 app.MapCachingEndpoints();
+app.MapAsyncConcurrencyEndpoints();
 app.MapConfigEndpoints();
 // Lessons: C# fundamentals + Collections & LINQ (pure functions, no services to register)
 app.MapCSharpEndpoints();
