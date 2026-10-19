@@ -3,4 +3,6 @@
   <Project Path="DevLab.Api/DevLab.Api.csproj" />
   <Project Path="DevLab.AppHost/DevLab.AppHost.csproj" />
   <Project Path="DevLab.ServiceDefaults/DevLab.ServiceDefaults.csproj" />
+  <Project Path="DevLab.AotDemo/DevLab.AotDemo.csproj" />
+  <Project Path="DevLab.Benchmarks/DevLab.Benchmarks.csproj" />
 </Solution>

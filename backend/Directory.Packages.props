@@ -32,6 +32,8 @@
     <PackageVersion Include="Aspire.Hosting.JavaScript" Version="13.6.1" />
     <!-- Transitive pin (Aspire.Hosting → StreamJsonRpc): 2.5.302 has GHSA-qhrr-8q5h-9q3h, NU1902 fails the build. -->
     <PackageVersion Include="MessagePack" Version="2.5.303" />
+    <!-- Benchmarks -->
+    <PackageVersion Include="BenchmarkDotNet" Version="0.15.8" />
     <!-- Tests -->
     <PackageVersion Include="coverlet.collector" Version="6.0.4" />
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.12" />

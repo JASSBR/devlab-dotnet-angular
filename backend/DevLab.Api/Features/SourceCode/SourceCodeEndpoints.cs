@@ -17,6 +17,8 @@ public static class SourceCodeEndpoints
         "backend/DevLab.ServiceDefaults",
         "backend/DevLab.AppHost",
         "docs/",
+        "backend/DevLab.Benchmarks",
+        "backend/DevLab.AotDemo",
         "backend/Directory.Build.props",
         "backend/Directory.Packages.props",
         "backend/.editorconfig",

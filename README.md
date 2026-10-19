@@ -10,26 +10,33 @@ Un **panneau Réseau** (en bas à droite) montre chaque requête HttpClient : m�
 
 ## Interface
 
-- **⌘K / Ctrl+K partout** — palette de commandes qui cherche dans les 28 leçons, les 57 questions d'entretien et
+- **⌘K / Ctrl+K partout** — palette de commandes qui cherche dans les 36 leçons, les 80 questions d'entretien et
   les 51 compétences de la roadmap, avec navigation clavier. L'index des questions (85 kB) n'est chargé qu'à la
   première ouverture, pour ne pas alourdir le premier rendu.
 - **Roadmap en timeline** — les 4 niveaux sur un fil conducteur, anneau de progression SVG par niveau.
 - Thème sombre avec deux sources de lumière, typographie fluide (`clamp()`), révélations décalées qui se
   désactivent sous `prefers-reduced-motion` — et qui ne conditionnent jamais la visibilité du contenu.
 
+## Parcours .NET
+
+`/parcours` : **The .NET Maturity Stack** en 7 niveaux — fondamentaux C#, types & POO, collections & LINQ,
+async & concurrence, ASP.NET Core & données, performance & runtime, systèmes en production. Chaque notion du
+référentiel (61 au total) renvoie à la leçon qui l'enseigne ; les leçons .NET de la barre latérale suivent cet ordre.
+La page propose la prochaine leçon à faire et suit ta progression par niveau.
+
 ## Mode carrière
 
 `/roadmap` : le référentiel .NET Junior → Middle → Senior → Architect (51 compétences) confronté à ce que le lab
-enseigne réellement. Trois états honnêtes — **leçon dédiée** (13), **partiel** (16), **à construire** (22) — chaque trou
-décrivant la leçon manquante. Couverture actuelle : **41 %**, forte sur Junior/Middle, mince sur Senior, quasi nulle sur Architect.
+enseigne réellement. Trois états honnêtes — **leçon dédiée** (20), **partiel** (17), **à construire** (14) — chaque trou
+décrivant la leçon manquante. Couverture actuelle : **56 %** : Junior et Middle presque complets, Senior bien couvert, Architect encore mince.
 Les items marqués ☁️ deviennent des démos réelles avec un abonnement Azure.
 
 ## Mode entretien
 
-`/interview` : 57 questions (Angular, .NET, Auth & sécurité, Architecture · Junior → Senior), QCM auto-corrigés et questions ouvertes
+`/interview` : 80 questions (Angular, .NET, Auth & sécurité, Architecture · Junior → Senior), QCM auto-corrigés et questions ouvertes
 avec détection des points-clés dans ta réponse + auto-évaluation, explication, schéma SVG et lien vers la leçon. Score et « à revoir » persistés en localStorage.
 
-## Les 28 leçons
+## Les 36 leçons
 
 | Angular | .NET | Auth full-stack |
 |---|---|---|
@@ -54,6 +61,7 @@ avec détection des points-clés dans ta réponse + auto-évaluation, explicatio
 | | Idempotence (Idempotency-Key) & outbox transactionnelle + inbox | |
 | | Observabilité : OpenTelemetry, viewer de traces, Aspire, runbooks | |
 | | Health checks : liveness, readiness, startup | |
+| | Performance & runtime : BenchmarkDotNet, Span/ArrayPool, GC, tiered JIT, dotnet-counters, Native AOT | |
 
 ## Déploiement
 
@@ -124,7 +132,7 @@ dotnet ef migrations add <Nom> --project backend/DevLab.Api --context OrdersDbCo
 ## Tester
 
 ```bash
-cd backend && dotnet test        # 48 tests : intégration (WebApplicationFactory) + architecture (NetArchTest)
+cd backend && dotnet test        # 112 tests : intégration (WebApplicationFactory) + architecture (NetArchTest)
 cd frontend && npm test          # Vitest
 ```
 

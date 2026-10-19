@@ -6,6 +6,11 @@ obj/
 *.db-wal
 .vs/
 
+# BenchmarkDotNet run output (the curated report is committed as RESULTS.md)
+BenchmarkDotNet.Artifacts/
+# dotnet publish output (AOT / JIT comparison)
+publish/
+
 # Node / Angular
 node_modules/
 dist/

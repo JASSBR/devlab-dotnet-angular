@@ -1,5 +1,6 @@
 **/bin
 **/obj
+**/BenchmarkDotNet.Artifacts
 **/node_modules
 **/dist
 **/.angular

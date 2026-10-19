@@ -19,7 +19,7 @@ const fold = (s: string) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,
 
 /**
  * ⌘K / Ctrl+K anywhere. Searches lessons, interview questions and roadmap skills
- * in one list — the fastest way around a site with 26 lessons and 51 skills.
+ * in one list — the fastest way around a site with 36 lessons and 51 skills.
  */
 @Component({
   selector: 'command-palette',
@@ -110,7 +110,7 @@ export class CommandPalette {
     })),
     { kind: 'page', label: 'Parcours .NET', icon: '🪜', route: ['/parcours'], hint: 'The .NET Maturity Stack : 7 niveaux, chaque notion → sa leçon', keywords: 'maturity stack parcours niveaux progression' },
     { kind: 'page', label: 'Mode carrière', icon: '🧭', route: ['/roadmap'], hint: 'Le référentiel .NET et ce que le lab couvre', keywords: 'roadmap junior middle senior architect' },
-    { kind: 'page', label: 'Mode entretien', icon: '🎤', route: ['/interview'], hint: '53 questions, QCM et ouvertes', keywords: 'interview quiz questions' },
+    { kind: 'page', label: 'Mode entretien', icon: '🎤', route: ['/interview'], hint: '80 questions, QCM et ouvertes', keywords: 'interview quiz questions' },
     { kind: 'page', label: 'Accueil', icon: '🏠', route: ['/'], hint: 'Vue d’ensemble du lab', keywords: 'home accueil' },
   ]);
   private enriched = false;

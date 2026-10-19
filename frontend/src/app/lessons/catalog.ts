@@ -89,6 +89,12 @@ export const LESSONS: Lesson[] = [
     files: [`${BE}/Features/Linq/DeferredExecution.cs`, `${BE}/Features/Linq/Collections.cs`, `${BE}/Features/Linq/LinqLesson.cs`, `${FE}/lessons/dotnet/collections-linq.ts`],
   },
   {
+    id: 'async-concurrency', track: 'dotnet', icon: '⏱️', title: 'Async & concurrence',
+    summary: 'WhenAll vs séquentiel, SemaphoreSlim, Channels, streaming IAsyncEnumerable, annulation, ValueTask, race conditions et thread pool starvation — tout mesuré en direct.',
+    concepts: ['Task.WhenAll', 'Task.WhenAny', 'SemaphoreSlim', 'Channel<T>', 'IAsyncEnumerable', 'CancellationToken', 'ValueTask', 'Interlocked', 'Lock', 'ThreadPool'],
+    files: [`${BE}/Features/AsyncConcurrency/AsyncConcurrencyLesson.cs`, `${BE}/Features/AsyncConcurrency/ConcurrencyDemos.cs`, `${BE}/Features/AsyncConcurrency/ThreadPoolDemo.cs`, `${FE}/lessons/dotnet/async-concurrency.ts`, 'backend/DevLab.Api.Tests/AsyncConcurrencyTests.cs'],
+  },
+  {
     id: 'minimal-vs-controllers', track: 'dotnet', icon: '🚪', title: 'Minimal API vs Controllers',
     summary: 'Le même endpoint écrit deux fois. Binding, TypedResults, OpenAPI & Scalar.',
     concepts: ['MapGet', 'MapGroup', '[ApiController]', 'TypedResults', 'OpenAPI'],
@@ -107,10 +113,10 @@ export const LESSONS: Lesson[] = [
     files: [`${BE}/Features/Middleware/PipelineTraceMiddleware.cs`, `${BE}/Features/Middleware/RequestTimingMiddleware.cs`, `${BE}/Features/Middleware/MiddlewareLesson.cs`, `${BE}/Program.cs`],
   },
   {
-    id: 'ef-core', track: 'dotnet', icon: '🗄️', title: 'EF Core + SQLite',
-    summary: 'DbContext, Fluent API, IQueryable composable (filtre + tri + pagination en une requête SQL), CRUD complet.',
-    concepts: ['DbContext', 'OnModelCreating', 'IQueryable', 'AsNoTracking', 'ExecuteDeleteAsync', 'DTO'],
-    files: [`${BE}/Features/Products/ProductsEndpoints.cs`, `${BE}/Features/Products/AppDbContext.cs`, `${BE}/Features/Products/Product.cs`, `${FE}/lessons/dotnet/ef-core.ts`],
+    id: 'options', track: 'dotnet', icon: '⚙️', title: 'Configuration & Options pattern',
+    summary: 'appsettings en couches, IOptions vs IOptionsSnapshot vs IOptionsMonitor, validation au démarrage.',
+    concepts: ['IConfiguration', 'Bind', 'IOptionsSnapshot', 'IOptionsMonitor', 'ValidateOnStart', 'user-secrets'],
+    files: [`${BE}/Features/Config/ConfigLesson.cs`, `${BE}/appsettings.json`, `${BE}/appsettings.Development.json`],
   },
   {
     id: 'validation', track: 'dotnet', icon: '✅', title: 'Validation & ProblemDetails',
@@ -119,40 +125,16 @@ export const LESSONS: Lesson[] = [
     files: [`${BE}/Features/Validation/ValidationLesson.cs`, `${BE}/Features/Validation/ValidationFilter.cs`],
   },
   {
-    id: 'realtime', track: 'dotnet', icon: '📡', title: 'SignalR + BackgroundService',
-    summary: 'Un hub typé, un service hébergé qui pousse des ticks toutes les 2 s, un chat, la présence.',
-    concepts: ['Hub<T>', 'IHubContext', 'BackgroundService', 'PeriodicTimer', 'Groups', 'WebSockets'],
-    files: [`${BE}/Features/Realtime/LiveHub.cs`, `${BE}/Features/Realtime/TickerBackgroundService.cs`, `${FE}/lessons/dotnet/realtime.ts`],
+    id: 'ef-core', track: 'dotnet', icon: '🗄️', title: 'EF Core + SQLite',
+    summary: 'DbContext, Fluent API, IQueryable composable (filtre + tri + pagination en une requête SQL), CRUD complet.',
+    concepts: ['DbContext', 'OnModelCreating', 'IQueryable', 'AsNoTracking', 'ExecuteDeleteAsync', 'DTO'],
+    files: [`${BE}/Features/Products/ProductsEndpoints.cs`, `${BE}/Features/Products/AppDbContext.cs`, `${BE}/Features/Products/Product.cs`, `${FE}/lessons/dotnet/ef-core.ts`],
   },
   {
-    id: 'caching', track: 'dotnet', icon: '🚀', title: 'Cache & rate limiting',
-    summary: 'IMemoryCache vs OutputCache vs HybridCache (L1 + L2, anti-stampede, tags), mesurés en direct. Puis un rate limiter qui répond 429.',
-    concepts: ['IMemoryCache', 'GetOrCreateAsync', 'CacheOutput', 'HybridCache', 'stampede', 'RemoveByTagAsync', 'RateLimiter', '429'],
-    files: [`${BE}/Features/Caching/CachingLesson.cs`, `${FE}/lessons/dotnet/caching.ts`, 'backend/DevLab.Api.Tests/HybridCacheTests.cs'],
-  },
-  {
-    id: 'resilience', track: 'dotnet', icon: '🛟', title: 'Résilience : retries, timeouts, circuit breaker',
-    summary: 'Une dépendance instable réglable, trois HttpClient (nu, standard handler, pipeline Polly v8 sur mesure) comparés en direct : tentatives, backoff, circuit ouvert, p50/p95.',
-    concepts: ['AddStandardResilienceHandler', 'AddResilienceHandler', 'retry + jitter', 'circuit breaker', 'attempt timeout', 'idempotence', 'hedging'],
-    files: [`${BE}/Features/Resilience/ResilienceLesson.cs`, `${BE}/Features/Resilience/ResilienceRecorder.cs`, `${BE}/Features/Resilience/FlakyEndpointState.cs`, `${BE}/Features/Resilience/SelfBaseAddress.cs`, 'backend/DevLab.Api.Tests/ResilienceTests.cs', `${FE}/lessons/dotnet/resilience.ts`],
-  },
-  {
-    id: 'api-versioning', track: 'dotnet', icon: '🏷️', title: 'Versioning d’API',
-    summary: 'Un contrat v1 déprécié et un v2 breaking, servis par URL, header et query string, avec api-supported-versions, Deprecation, Sunset et un document OpenAPI par version.',
-    concepts: ['Asp.Versioning.Http', 'NewVersionedApi', 'ApiVersionReader.Combine', 'ReportApiVersions', 'Deprecation', 'Sunset', 'OpenAPI par version'],
-    files: [`${BE}/Features/Versioning/ApiVersioningLesson.cs`, 'backend/DevLab.Api.Tests/ApiVersioningTests.cs', `${FE}/lessons/dotnet/api-versioning.ts`, `${BE}/Program.cs`],
-  },
-  {
-    id: 'async-concurrency', track: 'dotnet', icon: '⏱️', title: 'Async & concurrence',
-    summary: 'WhenAll vs séquentiel, SemaphoreSlim, Channels, streaming IAsyncEnumerable, annulation, ValueTask, race conditions et thread pool starvation — tout mesuré en direct.',
-    concepts: ['Task.WhenAll', 'Task.WhenAny', 'SemaphoreSlim', 'Channel<T>', 'IAsyncEnumerable', 'CancellationToken', 'ValueTask', 'Interlocked', 'Lock', 'ThreadPool'],
-    files: [`${BE}/Features/AsyncConcurrency/AsyncConcurrencyLesson.cs`, `${BE}/Features/AsyncConcurrency/ConcurrencyDemos.cs`, `${BE}/Features/AsyncConcurrency/ThreadPoolDemo.cs`, `${FE}/lessons/dotnet/async-concurrency.ts`, 'backend/DevLab.Api.Tests/AsyncConcurrencyTests.cs'],
-  },
-  {
-    id: 'options', track: 'dotnet', icon: '⚙️', title: 'Configuration & Options pattern',
-    summary: 'appsettings en couches, IOptions vs IOptionsSnapshot vs IOptionsMonitor, validation au démarrage.',
-    concepts: ['IConfiguration', 'Bind', 'IOptionsSnapshot', 'IOptionsMonitor', 'ValidateOnStart', 'user-secrets'],
-    files: [`${BE}/Features/Config/ConfigLesson.cs`, `${BE}/appsettings.json`, `${BE}/appsettings.Development.json`],
+    id: 'ef-migrations', track: 'dotnet', icon: '🧬', title: 'Migrations EF Core',
+    summary: 'Fini EnsureCreated : deux migrations par module, snapshot du modèle, __EFMigrationsHistory, et comment on les applique vraiment en production.',
+    concepts: ['migrations add', 'Up/Down', 'ModelSnapshot', '__EFMigrationsHistory', 'migrations bundle', 'expand/contract'],
+    files: [`${BE}/Features/Orders/Migrations/20261019092939_AddIdempotencyAndOutbox.cs`, `${BE}/Features/Orders/Migrations/OrdersDbContextModelSnapshot.cs`, `${BE}/Features/Orders/Migrations/Scripts/orders.migrations.sql`, `${BE}/Infrastructure/DbSeeder.cs`, `${BE}/Features/EfMigrations/MigrationsLesson.cs`, 'backend/DevLab.Api.Tests/MigrationsTests.cs', 'backend/.editorconfig', `${FE}/lessons/dotnet/ef-migrations.ts`],
   },
   {
     id: 'testing', track: 'dotnet', icon: '🧪', title: 'Tests d’intégration xUnit',
@@ -161,10 +143,28 @@ export const LESSONS: Lesson[] = [
     files: ['backend/DevLab.Api.Tests/LabApiFactory.cs', 'backend/DevLab.Api.Tests/ProductsEndpointsTests.cs', 'backend/DevLab.Api.Tests/AuthTests.cs'],
   },
   {
+    id: 'health-checks', track: 'dotnet', icon: '🩺', title: 'Health checks : liveness, readiness, startup',
+    summary: 'Trois probes filtrées par tags, un check EF Core, un check custom Degraded, un rapport JSON détaillé — et une dépendance à casser pour voir 503 vs 200.',
+    concepts: ['AddHealthChecks', 'IHealthCheck', 'tags + Predicate', 'AddDbContextCheck', 'Degraded', 'IHealthCheckPublisher', 'probes'],
+    files: [`${BE}/Features/HealthChecks/HealthChecksLesson.cs`, 'backend/DevLab.ServiceDefaults/Extensions.cs', 'backend/DevLab.Api.Tests/HealthChecksTests.cs', `${FE}/lessons/dotnet/health-checks.ts`, `${BE}/Program.cs`],
+  },
+  {
+    id: 'realtime', track: 'dotnet', icon: '📡', title: 'SignalR + BackgroundService',
+    summary: 'Un hub typé, un service hébergé qui pousse des ticks toutes les 2 s, un chat, la présence.',
+    concepts: ['Hub<T>', 'IHubContext', 'BackgroundService', 'PeriodicTimer', 'Groups', 'WebSockets'],
+    files: [`${BE}/Features/Realtime/LiveHub.cs`, `${BE}/Features/Realtime/TickerBackgroundService.cs`, `${FE}/lessons/dotnet/realtime.ts`],
+  },
+  {
     id: 'project-setup', track: 'dotnet', icon: '🏗️', title: 'Setup pro : props, analyzers, warnings = erreurs',
     summary: 'Directory.Build.props, Central Package Management, Meziantou + Sonar, et le triage des 230 erreurs que ça a levées sur ce lab.',
     concepts: ['Directory.Build.props', 'Directory.Packages.props', 'TreatWarningsAsErrors', 'AnalysisLevel', '.editorconfig', 'triage'],
     files: ['backend/Directory.Build.props', 'backend/Directory.Packages.props', 'backend/.editorconfig', `${BE}/DevLab.Api.csproj`],
+  },
+  {
+    id: 'performance-runtime', track: 'dotnet', icon: '🏎️', title: 'Performance & runtime : mesurer, allouer moins, JIT, AOT',
+    summary: 'BenchmarkDotNet, allocations mesurées en direct (Span, ArrayPool), GC et LOH, tiered JIT + OSR observés, dotnet-counters/trace, Native AOT chiffré.',
+    concepts: ['BenchmarkDotNet', '[MemoryDiagnoser]', 'Span<T>', 'ArrayPool', 'GC gen0/1/2 + LOH', 'DATAS', 'Tiered PGO', 'OSR', 'Meter', 'dotnet-counters', 'Native AOT'],
+    files: [`${BE}/Features/Performance/PerformanceLesson.cs`, `${BE}/Features/Performance/AllocationWorkloads.cs`, `${BE}/Features/Performance/TieringDemo.cs`, `${BE}/Features/Performance/PerfMetrics.cs`, 'backend/DevLab.Benchmarks/HotPathBenchmarks.cs', 'backend/DevLab.Benchmarks/RESULTS.md', 'backend/DevLab.AotDemo/Program.cs', 'backend/DevLab.AotDemo/Contracts.cs', 'backend/DevLab.AotDemo/DevLab.AotDemo.csproj', 'backend/DevLab.AotDemo/RESULTS.md', 'backend/DevLab.Api.Tests/PerformanceEndpointsTests.cs'],
   },
   {
     id: 'vertical-slice', track: 'dotnet', icon: '🍰', title: 'Vertical Slice Architecture + Result<T>',
@@ -179,10 +179,10 @@ export const LESSONS: Lesson[] = [
     files: [`${BE}/Features/Products/PublicApi/IProductCatalog.cs`, `${BE}/Features/Products/Events/OrderPlacedHandler.cs`, `${BE}/Infrastructure/Events/InProcessEventBus.cs`, `${BE}/Features/Orders/OrdersModule.cs`, `${BE}/Features/Products/ProductsModule.cs`, `${BE}/Infrastructure/Modules/IModule.cs`, 'backend/DevLab.Api.Tests/ModuleBoundariesTests.cs', `${BE}/Program.cs`],
   },
   {
-    id: 'ef-migrations', track: 'dotnet', icon: '🧬', title: 'Migrations EF Core',
-    summary: 'Fini EnsureCreated : deux migrations par module, snapshot du modèle, __EFMigrationsHistory, et comment on les applique vraiment en production.',
-    concepts: ['migrations add', 'Up/Down', 'ModelSnapshot', '__EFMigrationsHistory', 'migrations bundle', 'expand/contract'],
-    files: [`${BE}/Features/Orders/Migrations/20261019092939_AddIdempotencyAndOutbox.cs`, `${BE}/Features/Orders/Migrations/OrdersDbContextModelSnapshot.cs`, `${BE}/Features/Orders/Migrations/Scripts/orders.migrations.sql`, `${BE}/Infrastructure/DbSeeder.cs`, `${BE}/Features/EfMigrations/MigrationsLesson.cs`, 'backend/DevLab.Api.Tests/MigrationsTests.cs', 'backend/.editorconfig', `${FE}/lessons/dotnet/ef-migrations.ts`],
+    id: 'caching', track: 'dotnet', icon: '🚀', title: 'Cache & rate limiting',
+    summary: 'IMemoryCache vs OutputCache vs HybridCache (L1 + L2, anti-stampede, tags), mesurés en direct. Puis un rate limiter qui répond 429.',
+    concepts: ['IMemoryCache', 'GetOrCreateAsync', 'CacheOutput', 'HybridCache', 'stampede', 'RemoveByTagAsync', 'RateLimiter', '429'],
+    files: [`${BE}/Features/Caching/CachingLesson.cs`, `${FE}/lessons/dotnet/caching.ts`, 'backend/DevLab.Api.Tests/HybridCacheTests.cs'],
   },
   {
     id: 'idempotency-outbox', track: 'dotnet', icon: '📮', title: 'Idempotence & Outbox',
@@ -191,16 +191,22 @@ export const LESSONS: Lesson[] = [
     files: [`${BE}/Infrastructure/Idempotency/IdempotencyFilter.cs`, `${BE}/Features/Orders/PlaceOrder/PlaceOrder.Handler.cs`, `${BE}/Infrastructure/Messaging/OutboxDispatcher.cs`, `${BE}/Infrastructure/Messaging/OutboxMessage.cs`, `${BE}/Infrastructure/Messaging/MessageContext.cs`, `${BE}/Features/Products/Events/OrderPlacedHandler.cs`, `${BE}/Infrastructure/Persistence/TransactionExtensions.cs`, `${BE}/Features/Orders/Outbox/OutboxEndpoints.cs`, 'backend/DevLab.Api.Tests/IdempotencyTests.cs', 'backend/DevLab.Api.Tests/OutboxTests.cs', `${FE}/lessons/dotnet/idempotency-outbox.ts`],
   },
   {
+    id: 'resilience', track: 'dotnet', icon: '🛟', title: 'Résilience : retries, timeouts, circuit breaker',
+    summary: 'Une dépendance instable réglable, trois HttpClient (nu, standard handler, pipeline Polly v8 sur mesure) comparés en direct : tentatives, backoff, circuit ouvert, p50/p95.',
+    concepts: ['AddStandardResilienceHandler', 'AddResilienceHandler', 'retry + jitter', 'circuit breaker', 'attempt timeout', 'idempotence', 'hedging'],
+    files: [`${BE}/Features/Resilience/ResilienceLesson.cs`, `${BE}/Features/Resilience/ResilienceRecorder.cs`, `${BE}/Features/Resilience/FlakyEndpointState.cs`, `${BE}/Features/Resilience/SelfBaseAddress.cs`, 'backend/DevLab.Api.Tests/ResilienceTests.cs', `${FE}/lessons/dotnet/resilience.ts`],
+  },
+  {
     id: 'observability', track: 'dotnet', icon: '🔭', title: 'Observabilité : logs, métriques, traces',
     summary: 'Un checkout instrumenté (spans imbriqués, appel HttpClient, requête EF), un viewer de traces en waterfall avec ses logs corrélés, Aspire et les runbooks d’incident.',
     concepts: ['ActivitySource', 'Activity', 'Meter', 'traceparent', 'BeginScope', 'BaseProcessor', 'OTLP', 'Aspire'],
     files: [`${BE}/Features/Observability/CheckoutSimulator.cs`, `${BE}/Features/Observability/TelemetryStore.cs`, `${BE}/Features/Observability/ObservabilityLesson.cs`, 'backend/DevLab.ServiceDefaults/Extensions.cs', 'backend/DevLab.AppHost/Program.cs', `${FE}/lessons/dotnet/observability.ts`, 'docs/runbooks/01-api-5xx-readiness.md', 'docs/runbooks/02-latency-threadpool.md', 'docs/runbooks/03-signalr-cors-after-deploy.md'],
   },
   {
-    id: 'health-checks', track: 'dotnet', icon: '🩺', title: 'Health checks : liveness, readiness, startup',
-    summary: 'Trois probes filtrées par tags, un check EF Core, un check custom Degraded, un rapport JSON détaillé — et une dépendance à casser pour voir 503 vs 200.',
-    concepts: ['AddHealthChecks', 'IHealthCheck', 'tags + Predicate', 'AddDbContextCheck', 'Degraded', 'IHealthCheckPublisher', 'probes'],
-    files: [`${BE}/Features/HealthChecks/HealthChecksLesson.cs`, 'backend/DevLab.ServiceDefaults/Extensions.cs', 'backend/DevLab.Api.Tests/HealthChecksTests.cs', `${FE}/lessons/dotnet/health-checks.ts`, `${BE}/Program.cs`],
+    id: 'api-versioning', track: 'dotnet', icon: '🏷️', title: 'Versioning d’API',
+    summary: 'Un contrat v1 déprécié et un v2 breaking, servis par URL, header et query string, avec api-supported-versions, Deprecation, Sunset et un document OpenAPI par version.',
+    concepts: ['Asp.Versioning.Http', 'NewVersionedApi', 'ApiVersionReader.Combine', 'ReportApiVersions', 'Deprecation', 'Sunset', 'OpenAPI par version'],
+    files: [`${BE}/Features/Versioning/ApiVersioningLesson.cs`, 'backend/DevLab.Api.Tests/ApiVersioningTests.cs', `${FE}/lessons/dotnet/api-versioning.ts`, `${BE}/Program.cs`],
   },
 
   // ─── Auth (full-stack) ──────────────────────────────────────────────────

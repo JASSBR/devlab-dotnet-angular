@@ -101,10 +101,10 @@ import { Progress } from '../shared/progress';
 export class Home {
   readonly progress = inject(Progress);
   readonly stats = [
-    { value: 28, label: 'leçons' },
-    { value: 57, label: 'questions d’entretien' },
+    { value: 36, label: 'leçons' },
+    { value: 80, label: 'questions d’entretien' },
     { value: 51, label: 'compétences cartographiées' },
-    { value: 48, label: 'tests backend' },
+    { value: 112, label: 'tests backend' },
     { value: '⌘K', label: 'pour tout trouver' },
   ];
   readonly tracks = Object.entries(TRACKS) as [Track, (typeof TRACKS)[Track]][];

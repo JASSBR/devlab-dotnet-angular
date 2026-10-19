@@ -59,6 +59,7 @@ export const routes: Routes = [
   { path: 'lessons/testing', loadComponent: () => import('./lessons/dotnet/testing').then(m => m.TestingLesson) },
   { path: 'lessons/observability', loadComponent: () => import('./lessons/dotnet/observability').then(m => m.ObservabilityLesson), title: 'Observabilité' },
   { path: 'lessons/health-checks', loadComponent: () => import('./lessons/dotnet/health-checks').then(m => m.HealthChecksLesson), title: 'Health checks' },
+  { path: 'lessons/performance-runtime', loadComponent: () => import('./lessons/dotnet/performance-runtime').then(m => m.PerformanceRuntimeLesson), title: 'Performance & runtime' },
 
   // ── Auth ─────────────────────────────────────────────────────────────────
   { path: 'lessons/auth-jwt', loadComponent: () => import('./lessons/auth/jwt').then(m => m.JwtLesson) },
